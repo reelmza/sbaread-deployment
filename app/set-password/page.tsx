@@ -4,8 +4,7 @@ import AuthCard from "@/components/auth/AuthCard";
 import ThemeSpacer from "@/components/auth/ThemeSpacer";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
-import { LockKeyholeOpen, Mail } from "lucide-react";
-import Link from "next/link";
+import { LockKeyholeOpen } from "lucide-react";
 
 export default function Home() {
   const setPassword = async (e: React.SyntheticEvent) => {};
@@ -14,28 +13,16 @@ export default function Home() {
     <main className="h-full w-full flex items-center justify-center">
       {/* Set Password Card */}
       <AuthCard
-        onSubmit={setPassword}
         cardTitle="Welcome To SBAReads"
-        cardDescription="Signin to your account"
+        cardDescription="Set your account password"
+        onSubmit={setPassword}
       >
-        {/* Email Input */}
-        <Input
-          type="email"
-          name="email"
-          label="Email"
-          placeholder="Enter your email"
-          icon={
-            <Mail size={18} strokeWidth={1.5} className="text-neutral-dark" />
-          }
-        />
-        <ThemeSpacer size="element" />
-
-        {/* Password Input */}
+        {/* New Password Input*/}
         <Input
           type="password"
           name="password"
-          label="Password"
-          placeholder="Enter your password"
+          label="New Password"
+          placeholder="Enter new password"
           icon={
             <LockKeyholeOpen
               size={18}
@@ -44,16 +31,25 @@ export default function Home() {
             />
           }
         />
-
-        <ThemeSpacer size="element" />
-        <div className="self-end">
-          <Link href={"/reset-password"} className="text-neutral-dark">
-            Reset Password?
-          </Link>
-        </div>
         <ThemeSpacer size="element" />
 
-        <Button title="Login" type="submit" />
+        {/* Confirm Password Input*/}
+        <Input
+          type="password"
+          name="confirmPassword"
+          label="Confirm Password"
+          placeholder="Confirm new password"
+          icon={
+            <LockKeyholeOpen
+              size={18}
+              strokeWidth={1.5}
+              className="text-neutral-dark"
+            />
+          }
+        />
+        <ThemeSpacer size="element" />
+
+        <Button title="Create Password" type="submit" />
       </AuthCard>
     </main>
   );
