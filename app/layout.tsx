@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Raleway, Inter } from "next/font/google";
 import "./globals.css";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
 
 export default function RootLayout({
   children,
@@ -10,9 +12,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${fontPrimary.variable} ${fontSecondary.variable} font-secondary antialiased`}
+        className={`${fontPrimary.variable} ${fontSecondary.variable} relative flex font-secondary antialiased`}
       >
-        {children}
+        <Sidebar />
+        <div className="main grow">
+          <Header />
+
+          {children}
+        </div>
       </body>
     </html>
   );
