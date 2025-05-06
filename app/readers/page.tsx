@@ -124,6 +124,7 @@ const Readers = () => {
               className={`grid grid-cols-12 h-12 items-center px-5 text-gray-600 text-sm ${
                 tableData.indexOf(item) % 2 === 0 ? "bg-gray-50" : ""
               }`}
+              key={tableData.indexOf(item)}
             >
               {/* Serial */}
               <div className="col-span-1">{tableData.indexOf(item) + 1}</div>
