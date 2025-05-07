@@ -1,6 +1,14 @@
 import { Eye, Search, UserRoundX } from "lucide-react";
 import React from "react";
 import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import Link from "next/link";
 const Page = () => {
   const applications = [
     { name: "Musa Dia" },
@@ -121,7 +129,35 @@ const Page = () => {
                   height={100}
                   className="rounded-full mb-5"
                 />
-                <div className="mb-5">{item.name}</div>
+                <Dialog>
+                  <DialogTrigger className="mb-5 cursor-pointer outline-none">
+                    {item.name}
+                  </DialogTrigger>
+                  <DialogContent className="pt-10">
+                    <div className="w-full flex items-center justify-between">
+                      <div className="flex gap-4 items-center">
+                        <Image
+                          src={"/woman.jpg"}
+                          alt="African Woman"
+                          width={50}
+                          height={50}
+                          className="rounded-full"
+                        />
+
+                        <div className="text-lg font-semibold">{item.name}</div>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <button className="h-8 w-22 bg-emerald-600 rounded-md text-white text-sm cursor-pointer">
+                          Approve
+                        </button>
+                        <button className="h-8 w-22 bg-red-600 rounded-md text-white text-sm cursor-pointer">
+                          Decline
+                        </button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
 
                 <div className="w-full flex items-center gap-4 px-5">
                   <button className="bg-emerald-600 h-10 w-1/2 rounded-md text-sm text-white">
@@ -181,7 +217,9 @@ const Page = () => {
 
               {/* Action */}
               <div className="col-span-2 flex items-center gap-2">
-                <Eye size={20} strokeWidth={2} />
+                <Link href={`/authors/${tableData.indexOf(item)}`}>
+                  <Eye size={20} strokeWidth={2} />
+                </Link>
                 <UserRoundX size={20} strokeWidth={2} />
               </div>
             </div>
