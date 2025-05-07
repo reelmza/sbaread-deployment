@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 const Readers = () => {
@@ -114,7 +115,10 @@ const Readers = () => {
           <div className="col-span-3">Phone Number</div>
 
           {/* Membership */}
-          <div className="col-span-3">Membership</div>
+          <div className="col-span-2">Membership</div>
+
+          {/* Action */}
+          <div className="col-span-1">Action</div>
         </div>
 
         {/* Table Content */}
@@ -139,7 +143,17 @@ const Readers = () => {
               <div className="col-span-3">{item.phone}</div>
 
               {/* Membership */}
-              <div className="col-span-3">{item.membership}</div>
+              <div className="col-span-2">{item.membership}</div>
+
+              {/* Action */}
+              <div className="col-span-1">
+                <Link
+                  href={`/readers/${tableData.indexOf(item)}`}
+                  className="text-gray-600"
+                >
+                  View
+                </Link>
+              </div>
             </div>
           );
         })}
