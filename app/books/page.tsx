@@ -1,9 +1,28 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Image from "next/image";
-import { Search, Upload } from "lucide-react";
-const Book = () => {
+import { CheckCircle2, Search, Upload } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+const Book = ({ setModalState }: { setModalState: (val: boolean) => void }) => {
   return (
-    <div className="shadow w-[48%] rounded-md overflow-hidden shrink-0 mb-5">
+    <div
+      className="shadow w-[48%] rounded-md overflow-hidden shrink-0 mb-5 cursor-pointer"
+      onClick={() => setModalState(true)}
+    >
       <div className="w-full h-32 overflow-hidden">
         <Image src="/book.jpg" alt="A book cover" height={500} width={500} />
       </div>
@@ -21,16 +40,18 @@ const Book = () => {
     </div>
   );
 };
+
 const Books = () => {
+  const [modalState, setModalState] = useState<boolean>(false);
   return (
     <div className="px-10 w-full flex justify-between">
       <div className="w-[55%] flex items-center justify-between flex-wrap">
-        <Book />
-        <Book />
-        <Book />
-        <Book />
-        <Book />
-        <Book />
+        <Book setModalState={setModalState} />
+        <Book setModalState={setModalState} />
+        <Book setModalState={setModalState} />
+        <Book setModalState={setModalState} />
+        <Book setModalState={setModalState} />
+        <Book setModalState={setModalState} />
       </div>
       <div className="w-[40%]">
         <div className="fixed top-28 right-10 w-[calc(40%-7.7rem)] h-12">
@@ -119,6 +140,82 @@ const Books = () => {
           <div className="h-20"></div>
         </div>
       </div>
+
+      <Dialog open={modalState} onOpenChange={setModalState}>
+        <DialogContent>
+          <DialogHeader>
+            <VisuallyHidden>
+              <DialogTitle className="text-accent-dark text-2xl font-primary font-bold">
+                Password Updated!
+              </DialogTitle>
+            </VisuallyHidden>
+          </DialogHeader>
+
+          {/* Heading */}
+          <div className="w-full flex items-center justify-between">
+            <div className="flex gap-4 items-center">
+              <Image
+                src={"/woman.jpg"}
+                alt="African Woman"
+                width={50}
+                height={50}
+                className="rounded-full"
+              />
+
+              <div className="text-lg font-semibold">Teach me to pray</div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button className="h-8 w-22 bg-emerald-600 rounded-md text-white text-sm cursor-pointer">
+                Approve
+              </button>
+              <button className="h-8 w-22 bg-red-600 rounded-md text-white text-sm cursor-pointer">
+                Decline
+              </button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <Accordion type="single" collapsible className="p-0">
+            <AccordionItem value="item-1">
+              <AccordionTrigger className="cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={16} strokeWidth={2} />
+                  <div>Book Details</div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                Here goes a list of extra information about the book, such as
+                description, brief overview or author's bio.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-2">
+              <AccordionTrigger className="cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={16} strokeWidth={2} />
+                  <div>Content Upload</div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                Here goes URL to the document uploaded
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="item-3">
+              <AccordionTrigger className="cursor-pointer">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={16} strokeWidth={2} />
+                  <div>Pricing & Licensing</div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                Here goes licensing documentation
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
