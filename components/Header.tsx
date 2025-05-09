@@ -12,7 +12,7 @@ const Header = () => {
       path !== "/set-password" &&
       path !== "/reset-password" ? (
         <>
-          <div className="fixed w-[calc(100%-16.6667%)] h-20 flex items-center justify-between border-b border-gray-100 bg-white px-10">
+          <div className="fixed w-[calc(100%-16.6667%)] h-20 flex items-center justify-between border-b border-gray-100 bg-white px-10 z-20 p-10">
             <div className="">Account Overview</div>
             <div className="flex items-center text-gray-600">
               <div className="relative flex items-center justify-center h-fit w-fit shrink-0">
