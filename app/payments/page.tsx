@@ -222,6 +222,7 @@ const Page = () => {
           </div>
         </div>
       </div>
+
       {/* Graphs */}
       <div className="flex items-center justify-between mb-10">
         {/* Line Chart */}
@@ -235,11 +236,11 @@ const Page = () => {
           <PieChartX />
         </div>
       </div>
+
       {/* Tables */}
       {/* Transactions */}
       <div className="w-full mb-10">
         {/* Section Heading */}
-
         <div className="w-full flex items-center justify-between mb-5">
           <div>Transaction History</div>
           <Dialog>
@@ -406,6 +407,7 @@ const Page = () => {
           );
         })}
       </div>
+
       {/* Payout to Authors */}
       <div className="w-full mb-10">
         {/* Section Heading */}
@@ -576,6 +578,7 @@ const Page = () => {
           );
         })}
       </div>
+
       {/* Refund & Disputes */}
       <div className="w-full mb-10">
         {/* Section Heading */}
@@ -746,6 +749,7 @@ const Page = () => {
           );
         })}
       </div>
+
       <div className="h-10"></div>
     </div>
   );
