@@ -10,9 +10,7 @@ declare module "next-auth" {
       firstName: string;
       lastName: string;
       picture: string;
-      userType: string;
-      enablePushNotifications: boolean;
-      enableEmailNotifications: boolean;
+      account_type: string;
     } & DefaultSession["user"];
   }
 
@@ -23,11 +21,7 @@ declare module "next-auth" {
     firstName: string;
     lastName: string;
     profilePhoto: string;
-    userType: string;
-    userPreferences: {
-      enablePushNotifications: boolean;
-      enableEmailNotifications: boolean;
-    };
+    account_type: string;
   }
 }
 
@@ -44,12 +38,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         try {
           // Get user from database
-          const userSession = await fetch(
-            "https://sbareads-apis.onrender.com/api",
+          const targetUser = await fetch(
+            "https://sbareads-apis.onrender.com/api/auth/login",
             {
               method: "POST",
               headers: {
-                "Content-Type": "application/json-patch+json",
+                "Content-Type": "application/json",
+                "x-app-version": "0.0.1",
+                "x-device-id": "webapp",
+                "x-platform": "ios",
+                "x-app-id": "com.sbareads",
               },
               body: JSON.stringify({
                 email: credentials.email,
@@ -57,36 +55,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               }),
             }
           );
-          console.log(userSession);
+
           // Check if user exist
-          if (userSession.status === 401 || userSession.status === 400) {
+          if (targetUser.status === 401 || targetUser.status === 400) {
             return user;
           }
 
           // Parse user response body
-          const userSessionBody = await userSession.json();
+          const targetUserBody = await targetUser.json();
 
           // Get user details from DB
           const userProfile = await fetch(
-            `https://ecoride-be-r8at.onrender.com/api/v1/Users/admin/${userSessionBody.data.userId}`,
+            `https://sbareads-apis.onrender.com/api/user/profile`,
             {
-              method: "PUT",
+              method: "GET",
               headers: {
-                Authorization: `Bearer ${userSessionBody.data.token}`,
-                "Content-Type": "application/json-patch+json",
+                Authorization: `Bearer ${targetUserBody.data.token}`,
+                "Content-Type": "application/json",
+                "x-app-version": "0.0.1",
+                "x-device-id": "webapp",
+                "x-platform": "ios",
+                "x-app-id": "com.sbareads",
               },
-              body: JSON.stringify({
-                email: userSessionBody.data.email,
-              }),
             }
           );
 
           // Parse user details
           const userProfileBody = await userProfile.json();
+          console.log(userProfileBody);
 
           // Save merged user and session to user object
-          user = { ...userSessionBody.data, ...userProfileBody.data };
-          console.log(user);
+          user = { ...targetUserBody.data, ...userProfileBody.data };
           if (!user) {
             return null;
           }
@@ -110,23 +109,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.firstName = user.firstName;
         token.lastName = user.lastName;
         token.picture = user.profilePhoto;
-        token.userType = user.userType;
-        token.enablePushNotifications =
-          user.userPreferences.enablePushNotifications;
-        token.enableEmailNotifications =
-          user.userPreferences.enableEmailNotifications;
+        token.account_type = user.account_type;
       }
 
       if (trigger === "update") {
         // Note, that `session` can be any arbitrary object, remember to validate it!
+        // Property that never needs to be updated are not listed such as userId
+
         if (session?.token) token.token = session.token;
         if (session?.firstName) token.firstName = session.firstName;
         if (session?.lastName) token.lastName = session.lastName;
         if (session?.picture) token.picture = session.picture;
-        if (session?.enablePushNotifications !== undefined)
-          token.enablePushNotifications = session.enablePushNotifications;
-        if (session?.enableEmailNotifications !== undefined)
-          token.enableEmailNotifications = session.enableEmailNotifications;
       }
       return token;
     },
@@ -138,11 +131,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.firstName = token.firstName as string;
       session.user.lastName = token.lastName as string;
       session.user.picture = token.picture as string;
-      session.user.userType = token.userType as string;
-      session.user.enableEmailNotifications =
-        token.enableEmailNotifications as boolean;
-      session.user.enablePushNotifications =
-        token.enablePushNotifications as boolean;
+      session.user.account_type = token.account_type as string;
 
       return session;
     },

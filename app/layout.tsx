@@ -3,6 +3,7 @@ import { Raleway, Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
   children,
@@ -17,8 +18,9 @@ export default function RootLayout({
         <Sidebar />
         <div className="main grow">
           <Header />
-
           {children}
+
+          <Toaster />
         </div>
       </body>
     </html>

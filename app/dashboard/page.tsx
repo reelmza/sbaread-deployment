@@ -1,10 +1,20 @@
-// pages/dashboard.tsx
+"use client";
 import { BookOpen, Send, Wallet } from "lucide-react";
+import { SessionProvider, useSession } from "next-auth/react";
 import React from "react";
+
+const SessionLogger = () => {
+  const session = useSession();
+  console.log(session);
+  return null;
+};
 
 const Dashboard = () => {
   return (
     <div className="w-full h-full flex flex-col">
+      <SessionProvider>
+        <SessionLogger />
+      </SessionProvider>
       {/* Card and Stats */}
       <div className="flex justify-between w-full px-10 mb-10">
         {/* Card */}

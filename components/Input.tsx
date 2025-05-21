@@ -9,6 +9,7 @@ interface InputProps {
   placeholder: string;
   name: string;
   icon: React.JSX.Element;
+  defaultValue?: string;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -17,6 +18,7 @@ const Input: React.FC<InputProps> = ({
   label,
   type,
   placeholder,
+  defaultValue,
 }) => {
   return (
     <div className="w-full flex flex-col">
@@ -39,6 +41,7 @@ const Input: React.FC<InputProps> = ({
           id={name}
           type={type}
           placeholder={placeholder}
+          defaultValue={defaultValue || ""}
           className="grow h-full outline-none px-0"
           required
         />
