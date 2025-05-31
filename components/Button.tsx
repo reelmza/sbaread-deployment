@@ -5,7 +5,7 @@ interface ButtonProps {
   title: string;
   type?: "button" | "submit";
   icon?: JSX.Element | string;
-  disabled: boolean;
+  disabled?: boolean;
   onClick?: () => void;
 }
 

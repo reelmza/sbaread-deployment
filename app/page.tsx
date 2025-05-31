@@ -1,10 +1,10 @@
 "use client";
 
-import { SessionProvider, signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import AuthCard from "@/components/auth/AuthCard";
-import ThemeSpacer from "@/components/auth/ThemeSpacer";
+import ThemeSpacer from "@/components/ThemeSpacer";
 import Button from "@/components/Button";
-import Input from "@/components/Input";
+import Input from "@/components/auth/Input";
 import { LockKeyholeOpen, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -100,7 +100,7 @@ export default function Home() {
         <Button
           title="Login"
           type="submit"
-          disabled={loading === "doLogin"}
+          disabled={loading !== null}
           icon={loading === "doLogin" ? <Spinner className="size-5" /> : ""}
         />
       </AuthCard>

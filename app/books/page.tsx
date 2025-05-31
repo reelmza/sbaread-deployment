@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { CheckCircle2, Search, Upload } from "lucide-react";
 import {
@@ -16,6 +16,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+
+import { attachHeaders, localAxios } from "@/lib/axios";
+import { SessionProvider, useSession } from "next-auth/react";
+import Link from "next/link";
 
 const Book = ({ setModalState }: { setModalState: (val: boolean) => void }) => {
   return (
@@ -43,6 +47,26 @@ const Book = ({ setModalState }: { setModalState: (val: boolean) => void }) => {
 
 const Books = () => {
   const [modalState, setModalState] = useState<boolean>(false);
+  const [pageData, setPageData] = useState<null>(null);
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (!session) return;
+    const getBooks = async () => {
+      attachHeaders(session!.user.token);
+      try {
+        const res = await localAxios.get("/books/all");
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getBooks();
+
+    return () => {};
+  }, [session]);
+
   return (
     <div className="px-10 w-full flex justify-between">
       <div className="w-[55%] flex items-center justify-between flex-wrap">
@@ -84,14 +108,15 @@ const Books = () => {
           </div>
 
           {/* Upload  */}
-          <div className="w-full flex items-center gap-5 cursor-pointer mb-5">
-            <div className="h-16 w-16 bg-accent-light text-accent rounded-full flex items-center justify-center">
-              <Upload size={20} strokeWidth={2} />
+          <Link href={"/books/upload"}>
+            <div className="w-full flex items-center gap-5 cursor-pointer mb-5">
+              <div className="h-16 w-16 bg-accent-light text-accent rounded-full flex items-center justify-center">
+                <Upload size={20} strokeWidth={2} />
+              </div>
+
+              <div>Upload New Book</div>
             </div>
-
-            <div>Upload New Book</div>
-          </div>
-
+          </Link>
           {/* Book Request */}
           <div className="w-full min-h-[14rem] shadow  rounded-md overflow-hidden mb-20">
             {/* Heading */}
@@ -220,4 +245,11 @@ const Books = () => {
   );
 };
 
-export default Books;
+const BooksWrapper = () => {
+  return (
+    <SessionProvider>
+      <Books />
+    </SessionProvider>
+  );
+};
+export default BooksWrapper;

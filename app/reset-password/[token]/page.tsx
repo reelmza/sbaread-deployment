@@ -1,9 +1,9 @@
 "use client";
 
 import AuthCard from "@/components/auth/AuthCard";
-import ThemeSpacer from "@/components/auth/ThemeSpacer";
+import ThemeSpacer from "@/components/ThemeSpacer";
 import Button from "@/components/Button";
-import Input from "@/components/Input";
+import Input from "@/components/auth/Input";
 import {
   Dialog,
   DialogContent,

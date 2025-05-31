@@ -16,7 +16,7 @@ declare module "next-auth" {
 
   // User returned from database
   interface User {
-    userId: string;
+    user_id: string;
     token: string;
     firstName: string;
     lastName: string;
@@ -63,6 +63,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           // Parse user response body
           const targetUserBody = await targetUser.json();
+          console.log(targetUserBody);
 
           // Get user details from DB
           const userProfile = await fetch(
@@ -73,7 +74,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 Authorization: `Bearer ${targetUserBody.data.token}`,
                 "Content-Type": "application/json",
                 "x-app-version": "0.0.1",
-                "x-device-id": "webapp",
+                "x-device-id": "9fb1a2b7-5ddf-429d-99a9-88ff47b419dd",
                 "x-platform": "ios",
                 "x-app-id": "com.sbareads",
               },
@@ -104,7 +105,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         // User is available during sign-in
         // Extract data from database user returned
-        token.id = user.userId;
+        token.id = user.user_id;
         token.token = user.token;
         token.firstName = user.firstName;
         token.lastName = user.lastName;

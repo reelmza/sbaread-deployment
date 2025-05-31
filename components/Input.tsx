@@ -1,51 +1,59 @@
-// components/Input.tsx
-import { KeySquareIcon, LockKeyholeOpen } from "lucide-react";
-import React from "react";
-import ThemeSpacer from "./auth/ThemeSpacer";
+import ThemeSpacer from "./ThemeSpacer";
 
-interface InputProps {
-  label: string;
-  type: string;
-  placeholder: string;
+type InputType = {
   name: string;
-  icon: React.JSX.Element;
+  type: "text" | "password" | "textarea" | "tel" | "number";
+  label: string;
+  required?: boolean;
+  placeholder?: string;
   defaultValue?: string;
-}
+  className?: string;
+};
 
-const Input: React.FC<InputProps> = ({
-  icon,
-  name,
+const Input = ({
   label,
+  name,
   type,
+  required,
   placeholder,
   defaultValue,
-}) => {
+  className,
+}: InputType) => {
   return (
-    <div className="w-full flex flex-col">
-      <label
-        htmlFor={name}
-        className="font-secondary text-sm text-neutral-dark cursor-pointer"
-      >
+    <div className="flex flex-col text-sm">
+      {/* Input Label */}
+      <label htmlFor="bookTitle">
         {label}
-      </label>
-      <ThemeSpacer size="unit" />
-      <div className="flex items-center justify-center bg-neutral-light h-12 w-full gap-4 rounded-md">
-        {icon ? (
-          <div className="h-5 w-12 flex items-center justify-center border-r border-neutral">
-            {icon}
-          </div>
+        {required ? (
+          <span className="text-gray-400 mb-2 text-xs font-light ml-1 italic">
+            - required
+          </span>
         ) : (
           ""
         )}
+      </label>
+      <ThemeSpacer size="unit" />
+
+      {/* Input element */}
+      {type !== "textarea" ? (
         <input
           id={name}
+          name={name}
           type={type}
-          placeholder={placeholder}
-          defaultValue={defaultValue || ""}
-          className="grow h-full outline-none px-0"
-          required
+          className={`bg-gray-100 border outline-none h-12 rounded-md px-5 ${className}`}
+          placeholder={placeholder ? placeholder : ""}
+          defaultValue={defaultValue ? defaultValue : ""}
         />
-      </div>
+      ) : (
+        <textarea
+          id={name}
+          name={name}
+          className={`bg-gray-100 h-28 rounded-md p-5 ${className}`}
+          placeholder={placeholder ? placeholder : ""}
+          defaultValue={defaultValue ? defaultValue : ""}
+        ></textarea>
+      )}
+      <ThemeSpacer size="element" />
     </div>
   );
 };

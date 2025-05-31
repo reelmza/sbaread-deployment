@@ -107,7 +107,9 @@ const Sidebar = () => {
             <Link href={"/books"}>
               <div
                 className={`w-full h-12 flex items-center ${
-                  path === "/books" ? "bg-white text-accent font-semibold" : ""
+                  path.includes("/books")
+                    ? "bg-white text-accent font-semibold"
+                    : ""
                 } text-sm  px-10 gap-2 mb-2 cursor-pointer`}
               >
                 <svg
@@ -130,10 +132,12 @@ const Sidebar = () => {
             </Link>
 
             {/* Payment */}
-            <Link href={"/pay"}>
+            <Link href={"/payments"}>
               <div
                 className={`w-full h-12 flex items-center ${
-                  path === "/pay" ? "bg-white text-accent font-semibold " : ""
+                  path.includes("/payments")
+                    ? "bg-white text-accent font-semibold "
+                    : ""
                 } text-sm  px-10 gap-2 mb-2 cursor-pointer`}
               >
                 <svg
