@@ -3,22 +3,42 @@ import Input from "@/components/Input";
 import Spinner from "@/components/Spinner";
 import ThemeSpacer from "@/components/ThemeSpacer";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { attachHeaders, localAxios } from "@/lib/axios";
-import { CloudUpload, MoveRight, X } from "lucide-react";
+import { CloudUpload, Divide, MoveRight, PenBox, X } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
-import React, { useRef, useState } from "react";
+import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import { toast } from "sonner";
 
 type FormFileUpload = {
   label: string;
   name: string;
   fileTypes: string;
+};
+
+type Chapter = {
+  name: string;
+  pageNumber: string;
+  children?: Chapter[];
+};
+
+type TableOfContents = {
+  pageData: {
+    chapters: Chapter[] | null;
+    setChapters: Dispatch<SetStateAction<Chapter[] | null>>;
+  };
 };
 
 const FormFileUpload = ({ label, name, fileTypes }: FormFileUpload) => {
@@ -87,7 +107,7 @@ const FormFileUpload = ({ label, name, fileTypes }: FormFileUpload) => {
           accept={
             name === "bookCover" ? "image/*,.png,.jpeg,.jpg" : "image/*,.pdf"
           }
-          multiple={false}
+          multiple={true}
           onChange={updateFileInfo}
         />
 
@@ -141,29 +161,504 @@ const FormFileUpload = ({ label, name, fileTypes }: FormFileUpload) => {
   );
 };
 
-const TableOfContents = () => {
-  const [chapters, setChapters] = useState<
-    | {
-        name: string;
-        pageNumber: string;
-        children?: {
-          title: string;
-          pageNumber: string;
-          children?: { name: string; pageNumber: string }[];
-        }[];
-      }[]
-    | null
-  >(null);
+const TableOfContentsEdit = ({
+  chapterName,
+  chapterPageNumber,
+  targetAddress,
+  chapters,
+  actionToDo,
+  setChapters,
+  setOpenEditModal,
+}: {
+  chapterName: string;
+  chapterPageNumber: string;
+  targetAddress: number[];
+  chapters: Chapter[];
+  actionToDo: string;
+  setChapters: React.Dispatch<React.SetStateAction<Chapter[] | null>>;
+  setOpenEditModal: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  const [activeChapter, setActiveChapter] = useState<string[]>([
+    chapterName,
+    chapterPageNumber,
+  ]);
+
+  const updateChapters = (
+    indexes: number[],
+    input: string,
+    pageNumber: string
+  ) => {
+    if (indexes.length === 0) {
+      if (actionToDo === "add") {
+        setChapters((prev) => {
+          let data = prev as Chapter[];
+          data.push({ name: input, pageNumber });
+          console.log(data);
+          return [...data];
+        });
+      }
+      setOpenEditModal(false);
+    }
+
+    if (indexes.length == 1) {
+      if (actionToDo === "edit") {
+        setChapters((prev) => {
+          let data = prev as Chapter[];
+          data![indexes[0]].name = input;
+          data![indexes[0]].pageNumber = pageNumber;
+          console.log(indexes);
+          console.log(data![indexes[0]]);
+
+          return [...data];
+        });
+      }
+
+      if (actionToDo === "add") {
+        setChapters((prev) => {
+          const data = prev as Chapter[];
+
+          // If children exist
+          if (data![indexes[0]].children) {
+            data![indexes[0]].children?.push({ name: input, pageNumber });
+          } else {
+            data![indexes[0]].children = [{ name: input, pageNumber }];
+          }
+          console.log(data);
+          return [...data];
+        });
+      }
+      setOpenEditModal(false);
+    }
+
+    // if (indexes.length == 2) {
+    //   if (actionToDo === "edit") {
+    //     setChapters((prev) => {
+    //       let data = prev as Chapter[];
+    //       data![indexes[0]].children![indexes[1]].name = input;
+    //       data![indexes[0]].children![indexes[1]].pageNumber = pageNumber;
+
+    //       return [...data];
+    //     });
+    //   }
+
+    //   if (actionToDo === "add") {
+    //     setChapters((prev) => {
+    //       let data = prev as Chapter[];
+
+    //       if (data![indexes[0]].children![indexes[1]].children) {
+    //         data![indexes[0]].children![indexes[1]].children = [
+    //           { name: input, pageNumber },
+    //         ];
+    //       } else {
+    //         data![indexes[0]].children![indexes[1]].children?.push({
+    //           name: input,
+    //           pageNumber,
+    //         });
+    //       }
+
+    //       return [...data];
+    //     });
+    //   }
+
+    //   setOpenEditModal(false);
+    // }
+
+    // if (indexes.length == 3) {
+    //   setChapters((prev) => {
+    //     let data = prev as Chapter[];
+    //     data![indexes[0]].children![indexes[1]].children![indexes[2]].name =
+    //       input;
+    //     data![indexes[0]].children![indexes[1]].children![
+    //       indexes[2]
+    //     ].pageNumber = pageNumber;
+
+    //     return [...data];
+    //   });
+
+    //   setOpenEditModal(false);
+    // }
+  };
+
+  return (
+    <>
+      <div className="w-full flex items-center gap-4">
+        {/* Section Title */}
+        <div className="w-[70%]">
+          <label htmlFor="title" className="text-sm mb-2 block font-semibold">
+            Section Name
+          </label>
+          <input
+            id="title"
+            name="title"
+            type="text"
+            placeholder="Edit section"
+            className="w-full h-10 outline-none border rounded-md px-3 text-sm"
+            defaultValue={
+              targetAddress.length === 1
+                ? chapters[targetAddress[0]].name
+                : targetAddress.length === 2
+                ? chapters[targetAddress[0]].children![targetAddress[1]].name
+                : targetAddress.length === 3
+                ? chapters[targetAddress[0]].children![targetAddress[1]]
+                    .children![targetAddress[2]].name
+                : ""
+            }
+            onChange={(e) =>
+              setActiveChapter((prev) => {
+                return [e.target.value, prev[1]];
+              })
+            }
+            required
+          />
+        </div>
+
+        {/* Page Number */}
+        <div className="w-[30%]">
+          <label htmlFor="title" className="text-sm mb-2 block font-semibold">
+            Page Number
+          </label>
+          <input
+            type="text"
+            placeholder="Edit section"
+            className="w-full h-10 outline-none border rounded-md px-3 text-sm"
+            defaultValue={
+              targetAddress.length === 1
+                ? chapters[targetAddress[0]].pageNumber
+                : targetAddress.length === 2
+                ? chapters[targetAddress[0]].children![targetAddress[1]]
+                    .pageNumber
+                : targetAddress.length === 3
+                ? chapters[targetAddress[0]].children![targetAddress[1]]
+                    .children![targetAddress[2]].pageNumber
+                : ""
+            }
+            onChange={(e) =>
+              setActiveChapter((prev) => {
+                return [prev[0], e.target.value];
+              })
+            }
+            required
+          />
+        </div>
+      </div>
+
+      <ThemeSpacer size="element" />
+
+      <button
+        className="h-10 w-fit px-3 rounded-md text-sm bg-accent-dark hover:opacity-90 text-white cursor-pointer"
+        onClick={() =>
+          updateChapters(targetAddress, activeChapter[0], activeChapter[1])
+        }
+      >
+        Update Section
+      </button>
+    </>
+  );
+};
+
+const TableOfContents = ({ pageData }: TableOfContents) => {
+  const { chapters, setChapters } = pageData;
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [activeItem, setActiveItem] = useState<Chapter | null>(null);
+  const [nestCount, setNestCount] = useState<number[] | null>(null);
+  const [actionToDo, setActionToDo] = useState("add");
 
   return (
     <div className="w-full">
-      <div>Chapter 1</div>
+      {chapters !== null ? (
+        <div>
+          {/* TOC Accordion(s) */}
+          <Accordion type="single" collapsible className="p-0">
+            {chapters.map((item, key) => {
+              return (
+                <AccordionItem
+                  className="relative border-b-0 h-fit"
+                  value={`item-${key}`}
+                  key={key}
+                >
+                  <AccordionTrigger className="ml-[16px] cursor-pointer h-8 flex items-center hover:no-underline">
+                    <div className="flex items-center">
+                      <div className="flex items-center justify-center text-xs text-gray-600 font-light  bg-resd-100 leading-none w-[38px] mt-[2px]">
+                        CH {key + 1}
+                      </div>
+                      <div
+                        className={` ${item.children ? "hover:underline" : ""}`}
+                      >
+                        {item.name}
+                      </div>
+                    </div>
+                  </AccordionTrigger>
+
+                  {/* Content */}
+                  {item.children ? (
+                    <AccordionContent>
+                      {item.children
+                        ? item.children.map((itemNest1, keyNest1) => {
+                            return (
+                              <Accordion
+                                type="single"
+                                collapsible
+                                className="p-0 ml-4"
+                                key={keyNest1}
+                              >
+                                <AccordionItem
+                                  className="relative border-b-0 h-fit"
+                                  value={`item-${itemNest1}`}
+                                >
+                                  <AccordionTrigger className="ml-[16px] cursor-pointer h-8 flex items-center hover:no-underline">
+                                    <div className="flex items-center">
+                                      <div className="flex items-center justify-center text-xs text-gray-600 font-light  bg-resd-100 leading-none w-[38px] mt-[2px] ">
+                                        {key + 1}.{keyNest1 + 1}
+                                      </div>
+                                      <div
+                                        className={` ${
+                                          itemNest1.children
+                                            ? "hover:underline"
+                                            : ""
+                                        }`}
+                                      >
+                                        {itemNest1.name}
+                                      </div>
+                                    </div>
+                                  </AccordionTrigger>
+
+                                  {/* Content */}
+                                  {itemNest1.children ? (
+                                    <AccordionContent className="mt-2">
+                                      {itemNest1.children
+                                        ? itemNest1.children.map(
+                                            (itemNest2, keyNest2) => {
+                                              return (
+                                                <div
+                                                  key={keyNest2}
+                                                  className="relative ml-4 mb-2 flex items-center text-xs bg-redd-400 h-5"
+                                                >
+                                                  <div className="ml-6 mr-2 text-gray-400 font-light">
+                                                    {key}.{keyNest1}.{keyNest2}
+                                                  </div>
+                                                  <div>{itemNest2.name}</div>
+
+                                                  {/* Absolute elements */}
+                                                  {/* Edit Button */}
+                                                  <button
+                                                    onClick={() => {
+                                                      setActiveItem(item);
+                                                      setOpenEditModal(true);
+                                                      setNestCount([
+                                                        key,
+                                                        keyNest1,
+                                                        keyNest2,
+                                                      ]);
+                                                    }}
+                                                    className="absolute top-0 h-5 z-10 cursor-pointer"
+                                                  >
+                                                    <PenBox size={16} />
+                                                  </button>
+                                                </div>
+                                              );
+                                            }
+                                          )
+                                        : ""}
+                                    </AccordionContent>
+                                  ) : (
+                                    <AccordionContent>
+                                      {/* Add button if no Level 2 chapters */}
+                                      <button
+                                        onClick={() => {
+                                          setActiveItem(item);
+                                          setNestCount([key]);
+                                          setActionToDo("add");
+                                          setOpenEditModal(true);
+                                        }}
+                                        className="top-0 h-8 z-10 cursor-pointer text-sm"
+                                      >
+                                        Add sectionSfdfd
+                                      </button>
+                                    </AccordionContent>
+                                  )}
+
+                                  {/* Absolute elements */}
+                                  {/* Edit Button */}
+                                  <button
+                                    onClick={() => {
+                                      setActiveItem(item);
+                                      setOpenEditModal(true);
+                                      setNestCount([key, keyNest1]);
+                                    }}
+                                    className="absolute top-0 h-8 z-10 cursor-pointer"
+                                  >
+                                    <PenBox size={16} />
+                                  </button>
+
+                                  {/* Add button for more level 2 chapters */}
+                                  {keyNest1 ===
+                                  chapters[keyNest1].children!.length - 1 ? (
+                                    <button
+                                      onClick={() => {
+                                        setActiveItem(item);
+                                        setNestCount([key, keyNest1]);
+                                        setActionToDo("add");
+                                        setOpenEditModal(true);
+                                      }}
+                                      className="top-0 h-8 z-10 cursor-pointer text-sm"
+                                    >
+                                      Add sectionXX
+                                    </button>
+                                  ) : (
+                                    ""
+                                  )}
+                                </AccordionItem>
+                              </Accordion>
+                            );
+                          })
+                        : ""}
+                    </AccordionContent>
+                  ) : (
+                    <AccordionContent>
+                      {/* Add button if no level 2 chapters */}
+                      {key === chapters.length - 1 ? (
+                        <button
+                          onClick={() => {
+                            setActiveItem(item);
+                            setNestCount([key]);
+                            setActionToDo("add");
+                            setOpenEditModal(true);
+                          }}
+                          className="top-0 h-8 z-10 cursor-pointer text-sm ml-5"
+                        >
+                          Add sections LV 2
+                        </button>
+                      ) : (
+                        ""
+                      )}
+                    </AccordionContent>
+                  )}
+
+                  {/* Absolute elements */}
+                  {/* Edit Chapter Button */}
+                  <button
+                    onClick={() => {
+                      setActiveItem(item);
+                      setOpenEditModal(true);
+                      setNestCount([key]);
+                    }}
+                    className="absolute top-0 h-8 z-10 cursor-pointer"
+                  >
+                    <PenBox size={16} />
+                  </button>
+
+                  {/* Add button for level 1 chapters */}
+                  {key === chapters.length - 1 ? (
+                    <button
+                      onClick={() => {
+                        setActiveItem(item);
+                        setNestCount([]);
+                        setActionToDo("add");
+                        setOpenEditModal(true);
+                      }}
+                      className="top-0 h-8 z-10 cursor-pointer text-sm"
+                    >
+                      Add section LV 1
+                    </button>
+                  ) : (
+                    ""
+                  )}
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
+
+          {/* TOC Modal  */}
+          <Dialog open={openEditModal} onOpenChange={setOpenEditModal}>
+            <DialogContent>
+              <DialogHeader className="mb-2">
+                <DialogTitle>Edit Chapter </DialogTitle>
+                <DialogDescription>
+                  Update the selected chapters information
+                </DialogDescription>
+              </DialogHeader>
+
+              <TableOfContentsEdit
+                chapterName={activeItem?.name as string}
+                chapterPageNumber={activeItem?.pageNumber as string}
+                chapters={chapters}
+                actionToDo={actionToDo}
+                setChapters={setChapters}
+                setOpenEditModal={setOpenEditModal}
+                targetAddress={nestCount as number[]}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
+      ) : (
+        <div>No chapters added yet, please add a chapter to continue</div>
+      )}
     </div>
   );
 };
+
 const BookUpload = () => {
   const { data: session } = useSession();
   const [loading, setLoading] = useState<string | null>(null);
+  const [chapters, setChapters] = useState<Chapter[] | null>([
+    {
+      name: "Data Structures and Common Patterns",
+      pageNumber: "2",
+      children: [
+        {
+          name: "Stack Data Structures",
+          pageNumber: "2",
+          // children: [
+          //   { name: "Array Pop Method", pageNumber: "3" },
+          //   { name: "Array Shift Mehtod", pageNumber: "4" },
+          //   { name: "C++ Implementation of Array Pop", pageNumber: "5" },
+          // ],
+        },
+
+        {
+          name: "List Data Structures",
+          pageNumber: "7",
+          children: [
+            {
+              name: "Java Implementation of Shifting Operations",
+              pageNumber: "8",
+            },
+            { name: "List Casting and Time Complexities", pageNumber: "9" },
+            { name: "Data Parsing and Time Efficiency", pageNumber: "10" },
+          ],
+        },
+      ],
+    },
+
+    {
+      name: "Modern Algorithms and System Perfomance",
+      pageNumber: "2",
+      children: [
+        {
+          name: "Stack Data Structures",
+          pageNumber: "2",
+          children: [
+            { name: "Array Pop Method", pageNumber: "3" },
+            { name: "Array Shift Mehtod", pageNumber: "4" },
+            { name: "C++ Implementation of Array Pop", pageNumber: "5" },
+          ],
+        },
+
+        {
+          name: "List Data Structures",
+          pageNumber: "7",
+          children: [
+            {
+              name: "Java Implementation of Shifting Operations",
+              pageNumber: "8",
+            },
+            { name: "List Casting and Time Complexities", pageNumber: "9" },
+            { name: "Data Parsing and Time Efficiency", pageNumber: "10" },
+          ],
+        },
+      ],
+    },
+  ]);
 
   const createBook = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -172,12 +667,14 @@ const BookUpload = () => {
     const target = e.target as typeof e.target & {
       bookTitle: { value: string };
       bookSubtitle: { value: string };
+      bookPublisher: { value: string };
       bookGenre: { value: string };
       bookAbout: { value: string };
       bookAudience: { value: string };
       bookTags: { value: string };
       bookAuthors: { value: string };
-      bookPrice: { value: string };
+      bookActualPrice: { value: string };
+      bookDiscountedPrice: { value: string };
       bookISBN: { value: string };
       bookCover: { files: File[] };
       bookFiles: { files: File[] };
@@ -192,7 +689,17 @@ const BookUpload = () => {
       formData.append("books[0][sub_title]", target.bookSubtitle.value);
       formData.append("books[0][description]", target.bookAbout.value);
       formData.append("books[0][author_id]", session!.user.id);
+      formData.append("books[0][publisher]", target.bookPublisher.value);
+
       formData.append("books[0][isbn]", target.bookISBN.value);
+      formData.append(
+        "books[0][pricing][actual_price]",
+        target.bookActualPrice.value
+      );
+      formData.append(
+        "books[0][pricing][discounted_price]",
+        target.bookDiscountedPrice.value
+      );
 
       // Table of contents
       formData.append("books[0][table_of_contents][0][index]", " Chapter 1");
@@ -205,6 +712,12 @@ const BookUpload = () => {
       target.bookTags.value.split(",").forEach((tag, key) => {
         console.log(`Appended: books[0][tags][${key}] - ${tag}`);
         formData.append(`books[0][tags][${key}]`, tag);
+      });
+
+      // Iterate and target audience
+      target.bookAudience.value.split(",").forEach((tag, key) => {
+        console.log(`Appended: books[0][targetAudience][${key}] - ${tag}`);
+        formData.append(`books[0][target_audience][${key}]`, tag);
       });
 
       // Iterate and populate authors list
@@ -233,23 +746,14 @@ const BookUpload = () => {
     setLoading("createBook");
     try {
       attachHeaders(session!.user.token, "multipart/form-data");
-      // const res = await localAxios.post("/books", formData());
+      const res = await localAxios.post("/books", formData());
 
-      // if (res.status === 201) {
-      //   toast.success("Book has been created successfully", {
-      //     richColors: true,
-      //     position: "bottom-left",
-      //   });
-      // }
-
-      setTimeout(() => {
+      if (res.status === 201) {
         toast.success("Book has been created successfully", {
           richColors: true,
           position: "bottom-left",
         });
-
-        setLoading(null);
-      }, 1000);
+      }
     } catch (error) {
       console.log(error);
       setLoading(null);
@@ -281,7 +785,7 @@ const BookUpload = () => {
             {/* Content */}
             <div className="w-full flex items-center justify-between gap-2">
               <div className="text-sm text-gray-400 font-light">
-                21 Chapters
+                {} Chapters
               </div>
 
               <Dialog>
@@ -294,13 +798,15 @@ const BookUpload = () => {
                     <MoveRight size={14} strokeWidth="1.5" />
                   </button>
                 </DialogTrigger>
-                <DialogContent className="w-[30%]">
+                <DialogContent className="min-w-[40%] h-[80%]">
                   <DialogHeader>
-                    <DialogTitle className="font-medium">
+                    <DialogTitle className="font-semibold">
                       Manage Table of Contents
                     </DialogTitle>
                     <ThemeSpacer size="unit" />
-                    <TableOfContents />
+
+                    {/* Content */}
+                    <TableOfContents pageData={{ chapters, setChapters }} />
                   </DialogHeader>
                 </DialogContent>
               </Dialog>
@@ -381,7 +887,17 @@ const BookUpload = () => {
           type="text"
           label="Book Authors"
           placeholder="Enter a list of audience"
-          defaultValue="4,5"
+          defaultValue="1"
+          required
+        />
+
+        {/* Publisher */}
+        <Input
+          name="bookPublisher"
+          type="text"
+          label="Book Publishers"
+          placeholder="Provide a publisher"
+          defaultValue="Elsevier"
           required
         />
 

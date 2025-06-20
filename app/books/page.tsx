@@ -20,21 +20,49 @@ import {
 import { attachHeaders, localAxios } from "@/lib/axios";
 import { SessionProvider, useSession } from "next-auth/react";
 import Link from "next/link";
+import { auth } from "@/auth";
+import ThemeSpacer from "@/components/ThemeSpacer";
+import { toast } from "sonner";
+import Spinner from "@/components/Spinner";
 
-const Book = ({ setModalState }: { setModalState: (val: boolean) => void }) => {
+type Book = {
+  title: string;
+  publisher: string;
+  cover_image: {
+    public_url: string;
+  };
+};
+
+type BookType = {
+  setModalState: (val: boolean) => void;
+  setActiveBook: React.Dispatch<React.SetStateAction<Book | null>>;
+  book: Book;
+};
+
+const Book = ({ book, setActiveBook, setModalState }: BookType) => {
   return (
     <div
-      className="shadow w-[48%] rounded-md overflow-hidden shrink-0 mb-5 cursor-pointer"
-      onClick={() => setModalState(true)}
+      className="shadow w-[48%] rounded-md overflow-hidden shrink-0 mb-5 cursor-pointer  font-sans"
+      onClick={() => {
+        setActiveBook(book);
+        setModalState(true);
+      }}
     >
       <div className="w-full h-32 overflow-hidden">
-        <Image src="/book.jpg" alt="A book cover" height={500} width={500} />
+        <Image
+          src={book?.cover_image?.public_url}
+          alt="A book cover"
+          height={500}
+          width={500}
+        />
       </div>
 
       <div className="flex justify-between p-4">
         <div>
-          <div className="font-semibold">48 Laws of Power</div>
-          <div className="text-sm ">Published by: Seyi Benjamin</div>
+          <div className="font-semibold leading-5 mb-2">{book?.title}</div>
+          <div className="text-sm text-gray-600">
+            {book?.publisher || "No Publisher"}
+          </div>
         </div>
 
         <div className="w-20 flex items-center justify-center bg-accent text-sm rounded-full h-8 font-semibold">
@@ -47,7 +75,9 @@ const Book = ({ setModalState }: { setModalState: (val: boolean) => void }) => {
 
 const Books = () => {
   const [modalState, setModalState] = useState<boolean>(false);
-  const [pageData, setPageData] = useState<null>(null);
+  const [pageData, setPageData] = useState<Book[] | null>(null);
+  const [activeBook, setActiveBook] = useState<Book | null>(null);
+  const [loading, setLoading] = useState<string | null>(null);
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -57,6 +87,10 @@ const Books = () => {
       try {
         const res = await localAxios.get("/books/all");
         console.log(res);
+        if (res.status === 200) {
+          const data = res.data.data;
+          setPageData(data);
+        }
       } catch (error) {
         console.log(error);
       }
@@ -67,15 +101,43 @@ const Books = () => {
     return () => {};
   }, [session]);
 
+  const approveBook = async (id: number) => {
+    setLoading("approveBook");
+    try {
+      attachHeaders(session!.user.token);
+      const res = await localAxios.post(`/books/approve/${id}`);
+      console.log(res);
+      if (res.status === 200 || res.status === 201) {
+        toast.success("Book approved successfully", {
+          richColors: true,
+          position: "bottom-left",
+        });
+      }
+
+      setLoading(null);
+    } catch (error) {
+      console.log(error);
+      toast.error("An error occured, try again", {
+        richColors: true,
+        position: "bottom-left",
+      });
+
+      setLoading(null);
+    }
+  };
   return (
     <div className="px-10 w-full flex justify-between">
       <div className="w-[55%] flex items-center justify-between flex-wrap">
-        <Book setModalState={setModalState} />
-        <Book setModalState={setModalState} />
-        <Book setModalState={setModalState} />
-        <Book setModalState={setModalState} />
-        <Book setModalState={setModalState} />
-        <Book setModalState={setModalState} />
+        {pageData?.map((book, key) => {
+          return (
+            <Book
+              book={book}
+              setModalState={setModalState}
+              setActiveBook={setActiveBook}
+              key={key}
+            />
+          );
+        })}
       </div>
       <div className="w-[40%]">
         <div className="fixed top-28 right-10 w-[calc(40%-7.7rem)] h-12">
@@ -167,7 +229,7 @@ const Books = () => {
       </div>
 
       <Dialog open={modalState} onOpenChange={setModalState}>
-        <DialogContent>
+        <DialogContent className="min-w-[50%] min-h-[80%] flex flex-col">
           <DialogHeader>
             <VisuallyHidden>
               <DialogTitle className="text-accent-dark text-2xl font-primary font-bold">
@@ -180,19 +242,32 @@ const Books = () => {
           <div className="w-full flex items-center justify-between">
             <div className="flex gap-4 items-center">
               <Image
-                src={"/woman.jpg"}
+                src={activeBook?.cover_image.public_url || "/woman.jpg"}
                 alt="African Woman"
                 width={50}
                 height={50}
-                className="rounded-full"
+                className="rounded-full aspect-square"
               />
 
-              <div className="text-lg font-semibold">Teach me to pray</div>
+              <div>
+                <div className="text-lg font-semibold">{activeBook?.title}</div>
+                <div className="text-sm text-gray-600">
+                  {activeBook?.sub_title}
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center gap-4">
-              <button className="h-8 w-22 bg-emerald-600 rounded-md text-white text-sm cursor-pointer">
-                Approve
+              <button
+                className="h-8 w-22 bg-emerald-600 rounded-md text-white text-sm cursor-pointer flex items-center justify-center gap-2"
+                onClick={() => approveBook(activeBook?.id)}
+              >
+                <span>Approve</span>
+                {loading === "approveBook" ? (
+                  <Spinner className="size-5" />
+                ) : (
+                  ""
+                )}
               </button>
               <button className="h-8 w-22 bg-red-600 rounded-md text-white text-sm cursor-pointer">
                 Decline
@@ -210,8 +285,47 @@ const Books = () => {
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                Here goes a list of extra information about the book, such as
-                description, brief overview or author's bio.
+                {/* Description & Authors */}
+                <div className="flex flex-wrap justify-between">
+                  {/* Description */}
+                  <div className="w-[49%] bg-red- 100">
+                    <div className="font-semibold mb-1">Description</div>
+                    <p className="">{activeBook?.description}</p>
+                  </div>
+
+                  {/* Authors */}
+                  <div className="w-[49%] bg-gr een-100">
+                    <div className="font-semibold mb-1">Book Authors</div>
+                    {activeBook?.authors.map((author, key) => {
+                      return (
+                        <Link
+                          href={`/${author.id}`}
+                          className="hover:text-blue-600 lowercase"
+                          key={key}
+                        >
+                          {author.name}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <ThemeSpacer size="element" />
+
+                {/* Status and Approved By */}
+                <div className="flex items-center justify-between">
+                  <div className="w-[49%]">
+                    <div className="font-semibold mb-1">Status</div>
+                    <p className="">{activeBook?.status}</p>
+                  </div>
+
+                  <div className="w-[49%]">
+                    <div className="font-semibold mb-1">Approved By</div>
+                    <p className="">
+                      {activeBook?.approved_by || "Not approved"}
+                    </p>
+                  </div>
+                </div>
               </AccordionContent>
             </AccordionItem>
 
@@ -223,7 +337,21 @@ const Books = () => {
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                Here goes URL to the document uploaded
+                <div className="">
+                  <div className="font-semibold mb-5">Uploaded Files</div>
+                  <div className="flex items-center">
+                    <div>
+                      <div className="mb-1 ml-1 font-semibold">Cover Photo</div>
+                      <Link
+                        href={activeBook?.cover_image.public_url || ""}
+                        className="w-fit px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-600 text-xs rounded-full"
+                      >
+                        {activeBook?.cover_image.public_url.slice(0, 30) +
+                          "..."}
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               </AccordionContent>
             </AccordionItem>
 
@@ -235,7 +363,12 @@ const Books = () => {
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                Here goes licensing documentation
+                <div>
+                  <div className="font-semibold">Discounted Price</div>
+                  <div className="mb-5 text-sm">
+                    {activeBook?.currency} {activeBook?.discounted_price}
+                  </div>
+                </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
