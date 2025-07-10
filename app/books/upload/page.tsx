@@ -513,9 +513,13 @@ const BookUpload = () => {
       ],
     },
   ]);
-  const [selectedAuthors, setSelectedAuthors] = useState([]);
+  const [selectedAuthors, setSelectedAuthors] = useState<
+    { id: string; name: string }[]
+  >([]);
 
-  const [authorsSearch, setAuthorsSearch] = useState([]);
+  const [authorsSearch, setAuthorsSearch] = useState<
+    { id: string; name: string }[]
+  >([]);
 
   const createBook = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -622,7 +626,7 @@ const BookUpload = () => {
     }
   };
 
-  const removeAuthor = (authorToRemove) => {
+  const removeAuthor = (authorToRemove: { name: string; id: string }) => {
     const filter = selectedAuthors.filter(
       (author) => author.name !== authorToRemove.name
     );
@@ -640,6 +644,7 @@ const BookUpload = () => {
     const targetResult = authors.filter((item) =>
       item.name.includes(target.value)
     );
+
     setAuthorsSearch(targetResult);
   };
 
@@ -825,7 +830,7 @@ const BookUpload = () => {
                         });
 
                         setAuthorsSearch([]);
-                        authorsSearchInput.current.value = "";
+                        authorsSearchInput!.current!.value = "";
                       }}
                     >
                       {item.name}
