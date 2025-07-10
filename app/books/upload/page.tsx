@@ -451,6 +451,8 @@ const TableOfContents = ({ pageData }: TableOfContents) => {
 
 const BookUpload = () => {
   const { data: session } = useSession();
+
+  const authorsSearchInput = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [chapters, setChapters] = useState<Chapter[] | null>([
     {
@@ -620,6 +622,14 @@ const BookUpload = () => {
     }
   };
 
+  const removeAuthor = (authorToRemove) => {
+    const filter = selectedAuthors.filter(
+      (author) => author.name !== authorToRemove.name
+    );
+
+    setSelectedAuthors(filter);
+  };
+
   const searchUser = (e: React.SyntheticEvent) => {
     e.preventDefault();
 
@@ -756,53 +766,77 @@ const BookUpload = () => {
 
         {/* Authors */}
 
-        <div className="w-full relative flex items-center bg-gray-100 border outline-none h-12 rounded-md px-5">
-          <div className="flex items-center justify-center text-sm">
-            {selectedAuthors.map((item, key) => {
-              return (
-                <div key={key} className="mr-1 bg-gray-300 px-2 rounded-md">
-                  {item.name}
-                </div>
-              );
-            })}
-          </div>
+        <div className="w-full flex flex-col">
+          {/* Author Lable */}
+          <label htmlFor="bookAuthors" className="text-sm mb-2">
+            Book Authors
+          </label>
 
-          <input
-            name="bookAuthors"
-            type="text"
-            placeholder="Enter a list of audience"
-            className="bg-transparent border-none outline-none"
-            defaultValue=""
-            onChange={(e) => searchUser(e)}
-            required
-          />
-          {authorsSearch.length > 0 ? (
-            <div className="absolute top-[5rem] left-0 min-h-12 w-full bg-white border rounded-md p-2">
-              {authorsSearch.slice(0, 4).map((item, key) => {
+          {/* Content */}
+          <div className="w-full relative flex items-center bg-gray-100 border outline-none h-12 rounded-md px-5 mb-2">
+            {/* Displayer */}
+            <div className="flex items-center justify-center text-sm">
+              {selectedAuthors.map((item, key) => {
                 return (
                   <div
                     key={key}
-                    className="text-sm hover:bg-gray-100 cursor-pointer px-3 rounded-md py-[5px]"
-                    onClick={() => {
-                      setSelectedAuthors((prev) => {
-                        if (prev.length < 1) {
-                          console.log([item]);
-                          return [item];
-                        }
-                        return [...prev, item];
-                      });
-
-                      setAuthorsSearch([]);
-                    }}
+                    className="mr-1 bg-gray-300 px-2 rounded-md flex items-center gap-1"
                   >
-                    {item.name}
+                    <span>{item.name}</span>
+                    <button
+                      className="flex items-center justify-center"
+                      onClick={() => removeAuthor(item)}
+                      type="button"
+                    >
+                      <X size={12} className="cursor-pointer" />
+                    </button>
                   </div>
                 );
               })}
             </div>
-          ) : (
-            ""
-          )}
+
+            {/* Input */}
+            <input
+              name="bookAuthors"
+              type="text"
+              placeholder="Type an author name"
+              className="bg-transparent border-none outline-none text-sm"
+              defaultValue=""
+              ref={authorsSearchInput}
+              onChange={(e) => searchUser(e)}
+              required
+            />
+
+            {/* Search drop down */}
+            {authorsSearch.length > 0 ? (
+              <div className="absolute top-[5rem] left-0 min-h-12 w-full bg-white border rounded-md p-2">
+                {authorsSearch.slice(0, 4).map((item, key) => {
+                  return (
+                    <div
+                      key={key}
+                      className="text-sm hover:bg-gray-100 cursor-pointer px-3 rounded-md py-[5px]"
+                      onClick={() => {
+                        setSelectedAuthors((prev) => {
+                          if (prev.length < 1) {
+                            console.log([item]);
+                            return [item];
+                          }
+                          return [...prev, item];
+                        });
+
+                        setAuthorsSearch([]);
+                        authorsSearchInput.current.value = "";
+                      }}
+                    >
+                      {item.name}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              ""
+            )}
+          </div>
         </div>
 
         {/* Publisher */}
