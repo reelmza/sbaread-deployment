@@ -511,7 +511,7 @@ const BookUpload = () => {
       ],
     },
   ]);
-  const [authorArray, setAuthorArray] = useState([]);
+  const [selectedAuthors, setSelectedAuthors] = useState([]);
 
   const [authorsSearch, setAuthorsSearch] = useState([]);
 
@@ -576,11 +576,11 @@ const BookUpload = () => {
       });
 
       // Iterate and populate authors list
-      // target.bookAuthors.value.split(",").forEach((author, key) => {
-      //   console.log(`Appended: books[0][author][${key}] - ${author}`);
-      //   formData.append(`books[0][authors][${key}]`, author);
-      // });
-      formData.append(`books[0][authors][1]`, "1");
+      selectedAuthors.forEach((author, key) => {
+        console.log(`Appended: books[0][author][${key}] - ${author}`);
+        formData.append(`books[0][authors][${key}]`, author.id);
+      });
+      // formData.append(`books[0][authors][1]`, "1");
 
       // Book Cover Image
       formData.append("books[0][cover_image]", target.bookCover.files[0]);
@@ -756,17 +756,26 @@ const BookUpload = () => {
 
         {/* Authors */}
 
-        <div className="w-full relative">
-          <Input
+        <div className="w-full relative flex items-center bg-gray-100 border outline-none h-12 rounded-md px-5">
+          <div className="flex items-center justify-center text-sm">
+            {selectedAuthors.map((item, key) => {
+              return (
+                <div key={key} className="mr-1 bg-gray-300 px-2 rounded-md">
+                  {item.name}
+                </div>
+              );
+            })}
+          </div>
+
+          <input
             name="bookAuthors"
             type="text"
-            label="Book Authors"
             placeholder="Enter a list of audience"
-            defaultValue="1"
+            className="bg-transparent border-none outline-none"
+            defaultValue=""
             onChange={(e) => searchUser(e)}
             required
           />
-
           {authorsSearch.length > 0 ? (
             <div className="absolute top-[5rem] left-0 min-h-12 w-full bg-white border rounded-md p-2">
               {authorsSearch.slice(0, 4).map((item, key) => {
@@ -774,7 +783,17 @@ const BookUpload = () => {
                   <div
                     key={key}
                     className="text-sm hover:bg-gray-100 cursor-pointer px-3 rounded-md py-[5px]"
-                    onClick={() => setAuthorsSearch([])}
+                    onClick={() => {
+                      setSelectedAuthors((prev) => {
+                        if (prev.length < 1) {
+                          console.log([item]);
+                          return [item];
+                        }
+                        return [...prev, item];
+                      });
+
+                      setAuthorsSearch([]);
+                    }}
                   >
                     {item.name}
                   </div>
