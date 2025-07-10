@@ -1,99 +1,184 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/T2u8FQSegN7
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
+return (
+  <AccordionItem
+    className="relative border-b-0 h-fit"
+    value={`item-${key}`}
+    key={key}
+  >
+    <AccordionTrigger className="ml-[16px] cursor-pointer h-8 flex items-center hover:no-underline">
+      <div className="flex items-center">
+        <div className="flex items-center justify-center text-xs text-gray-600 font-light  bg-resd-100 leading-none w-[38px] mt-[2px]">
+          CH {key + 1}
+        </div>
+        <div className={` ${item.children ? "hover:underline" : ""}`}>
+          {item.name}
+        </div>
+      </div>
+    </AccordionTrigger>
 
-export default function Component() {
-  return (
-    <Accordion type="single" collapsible className="w-full">
-      <AccordionItem value="item-1">
-        <AccordionTrigger className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-5 w-5">
-              <ChevronDownIcon className="h-full w-full" />
-            </div>
-            <h3 className="text-lg font-medium">Accordion Item 1</h3>
-          </div>
-          <div className="h-5 w-5">
-            <ChevronDownIcon className="h-full w-full" />
-          </div>
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="space-y-4 p-4">
-            <p>
-              This is the content for the first accordion item. It can include
-              text, images, or other UI elements.
-            </p>
-            <img
-              src="/placeholder.svg"
-              alt="Accordion Image"
-              width={400}
-              height={300}
-              className="rounded-lg"
-              style={{ aspectRatio: "400/300", objectFit: "cover" }}
-            />
-            <Accordion type="single" collapsible>
-              <AccordionItem value="nested-item-1">
-                <AccordionTrigger className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="h-5 w-5">
-                      <ChevronDownIcon className="h-full w-full" />
-                    </div>
-                    <h3 className="text-lg font-medium">
-                      Nested Accordion Item 1
-                    </h3>
-                  </div>
-                  <div className="h-5 w-5">
-                    <ChevronDownIcon className="h-full w-full" />
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-4 p-4">
-                    <p>
-                      This is the content for the nested accordion item. It can
-                      include text, images, or other UI elements.
-                    </p>
-                    <img
-                      src="/placeholder.svg"
-                      alt="Nested Accordion Image"
-                      width={400}
-                      height={300}
-                      className="rounded-lg"
-                      style={{ aspectRatio: "400/300", objectFit: "cover" }}
-                    />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
-  );
-}
+    {/* Content */}
+    {item.children ? (
+      <AccordionContent>
+        {item.children
+          ? item.children.map((itemNest1, keyNest1) => {
+              return (
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="p-0 ml-4"
+                  key={keyNest1}
+                >
+                  <AccordionItem
+                    className="relative border-b-0 h-fit"
+                    value={`item-${itemNest1}`}
+                  >
+                    <AccordionTrigger className="ml-[16px] cursor-pointer h-8 flex items-center hover:no-underline">
+                      <div className="flex items-center">
+                        <div className="flex items-center justify-center text-xs text-gray-600 font-light  bg-resd-100 leading-none w-[38px] mt-[2px] ">
+                          {key + 1}.{keyNest1 + 1}
+                        </div>
+                        <div
+                          className={` ${
+                            itemNest1.children ? "hover:underline" : ""
+                          }`}
+                        >
+                          {itemNest1.name}
+                        </div>
+                      </div>
+                    </AccordionTrigger>
 
-function ChevronDownIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+                    {/* Content */}
+                    {itemNest1.children ? (
+                      <AccordionContent className="mt-2">
+                        {itemNest1.children
+                          ? itemNest1.children.map((itemNest2, keyNest2) => {
+                              return (
+                                <div
+                                  key={keyNest2}
+                                  className="relative ml-4 mb-2 flex items-center text-xs bg-redd-400 h-5"
+                                >
+                                  <div className="ml-6 mr-2 text-gray-400 font-light">
+                                    {key}.{keyNest1}.{keyNest2}
+                                  </div>
+                                  <div>{itemNest2.name}</div>
+
+                                  {/* Absolute elements */}
+                                  {/* Edit Button */}
+                                  <button
+                                    onClick={() => {
+                                      setActiveItem(item);
+                                      setOpenEditModal(true);
+                                      setNestCount([key, keyNest1, keyNest2]);
+                                    }}
+                                    className="absolute top-0 h-5 z-10 cursor-pointer"
+                                  >
+                                    <PenBox size={16} />
+                                  </button>
+                                </div>
+                              );
+                            })
+                          : ""}
+                      </AccordionContent>
+                    ) : (
+                      <AccordionContent>
+                        {/* Add button if no Level 2 chapters */}
+                        <button
+                          onClick={() => {
+                            setActiveItem(item);
+                            setNestCount([key]);
+                            setActionToDo("add");
+                            setOpenEditModal(true);
+                          }}
+                          className="top-0 h-8 z-10 cursor-pointer text-sm"
+                        >
+                          Add sectionSfdfd
+                        </button>
+                      </AccordionContent>
+                    )}
+
+                    {/* Absolute elements */}
+                    {/* Edit Button */}
+                    <button
+                      onClick={() => {
+                        setActiveItem(item);
+                        setOpenEditModal(true);
+                        setNestCount([key, keyNest1]);
+                      }}
+                      className="absolute top-0 h-8 z-10 cursor-pointer"
+                    >
+                      <PenBox size={16} />
+                    </button>
+
+                    {/* Add button for more level 2 chapters */}
+                    {keyNest1 === chapters[keyNest1].children!.length - 1 ? (
+                      <button
+                        onClick={() => {
+                          setActiveItem(item);
+                          setNestCount([key, keyNest1]);
+                          setActionToDo("add");
+                          setOpenEditModal(true);
+                        }}
+                        className="top-0 h-8 z-10 cursor-pointer text-sm"
+                      >
+                        Add sectionXX
+                      </button>
+                    ) : (
+                      ""
+                    )}
+                  </AccordionItem>
+                </Accordion>
+              );
+            })
+          : ""}
+      </AccordionContent>
+    ) : (
+      <AccordionContent>
+        {/* Add button if no level 2 chapters */}
+        {key === chapters.length - 1 ? (
+          <button
+            onClick={() => {
+              setActiveItem(item);
+              setNestCount([key]);
+              setActionToDo("add");
+              setOpenEditModal(true);
+            }}
+            className="top-0 h-8 z-10 cursor-pointer text-sm ml-5"
+          >
+            Add sections LV 2
+          </button>
+        ) : (
+          ""
+        )}
+      </AccordionContent>
+    )}
+
+    {/* Absolute elements */}
+    {/* Edit Chapter Button */}
+    <button
+      onClick={() => {
+        setActiveItem(item);
+        setOpenEditModal(true);
+        setNestCount([key]);
+      }}
+      className="absolute top-0 h-8 z-10 cursor-pointer"
     >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
+      <PenBox size={16} />
+    </button>
+
+    {/* Add button for level 1 chapters */}
+    {key === chapters.length - 1 ? (
+      <button
+        onClick={() => {
+          setActiveItem(item);
+          setNestCount([]);
+          setActionToDo("add");
+          setOpenEditModal(true);
+        }}
+        className="top-0 h-8 z-10 cursor-pointer text-sm"
+      >
+        Add section LV 1
+      </button>
+    ) : (
+      ""
+    )}
+  </AccordionItem>
+);

@@ -11,9 +11,11 @@ export const attachHeaders = (token: string | null, contentType?: string) => {
   // Set default headers
   localAxios.defaults.headers.common["x-app-version"] = "0.0.1";
   localAxios.defaults.headers.common["x-device-id"] =
-    "9fb1a2b7-5ddf-429d-99a9-88ff47b419dd";
+    "6f0fce80-13ee-42d7-96bf-59a42ee6e39e";
   localAxios.defaults.headers.common["x-platform"] = "ios";
   localAxios.defaults.headers.common["x-app-id"] = "com.sbareads";
+  // localAxios.defaults.headers.common["x-allow-guest-access"] =
+  //   "b8a9e5e2-7c3a-4f8b-9c2d-2f3e6a1b4c5d";
 
   // Set token if available
   if (token)

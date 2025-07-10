@@ -39,7 +39,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           // Get user from database
           const targetUser = await fetch(
-            "https://sbareads-apis.onrender.com/api/auth/login",
+            "https://sbareads-apis-live.onrender.com/api/auth/login",
             {
               method: "POST",
               headers: {
@@ -67,7 +67,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           // Get user details from DB
           const userProfile = await fetch(
-            `https://sbareads-apis.onrender.com/api/user/profile`,
+            `https://sbareads-apis-live.onrender.com/api/user/profile`,
             {
               method: "GET",
               headers: {

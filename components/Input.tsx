@@ -8,6 +8,7 @@ type InputType = {
   placeholder?: string;
   defaultValue?: string;
   className?: string;
+  onChange?: (e: any) => void;
 };
 
 const Input = ({
@@ -18,6 +19,7 @@ const Input = ({
   placeholder,
   defaultValue,
   className,
+  onChange,
 }: InputType) => {
   return (
     <div className="flex flex-col text-sm">
@@ -40,6 +42,7 @@ const Input = ({
           id={name}
           name={name}
           type={type}
+          onChange={onChange}
           className={`bg-gray-100 border outline-none h-12 rounded-md px-5 ${className}`}
           placeholder={placeholder ? placeholder : ""}
           defaultValue={defaultValue ? defaultValue : ""}

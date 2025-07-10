@@ -54,7 +54,7 @@ const Header = () => {
 
                 <div
                   className={`w-48 absolute -bottom-24 right-10 p-2 border bg-white rounded-md shadow text-sm ${
-                    profileState ? "opacity-100" : "opacity-0"
+                    profileState ? "opacity-100" : "opacity-0 hidden"
                   } transition-all ease-in-out duration-500`}
                 >
                   <Link href="/profile">

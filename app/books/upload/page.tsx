@@ -21,6 +21,7 @@ import { CloudUpload, Divide, MoveRight, PenBox, X } from "lucide-react";
 import { SessionProvider, useSession } from "next-auth/react";
 import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import { toast } from "sonner";
+import { authors } from "@/lib/authors";
 
 type FormFileUpload = {
   label: string;
@@ -371,12 +372,8 @@ const TableOfContents = ({ pageData }: TableOfContents) => {
           <Accordion type="single" collapsible className="p-0">
             {chapters.map((item, key) => {
               return (
-                <AccordionItem
-                  className="relative border-b-0 h-fit"
-                  value={`item-${key}`}
-                  key={key}
-                >
-                  <AccordionTrigger className="ml-[16px] cursor-pointer h-8 flex items-center hover:no-underline">
+                <div className="relative border-b-0 h-fit" key={key}>
+                  <div className="ml-[16px] cursor-pointer h-8 flex items-center hover:no-underline">
                     <div className="flex items-center">
                       <div className="flex items-center justify-center text-xs text-gray-600 font-light  bg-resd-100 leading-none w-[38px] mt-[2px]">
                         CH {key + 1}
@@ -387,155 +384,10 @@ const TableOfContents = ({ pageData }: TableOfContents) => {
                         {item.name}
                       </div>
                     </div>
-                  </AccordionTrigger>
-
-                  {/* Content */}
-                  {item.children ? (
-                    <AccordionContent>
-                      {item.children
-                        ? item.children.map((itemNest1, keyNest1) => {
-                            return (
-                              <Accordion
-                                type="single"
-                                collapsible
-                                className="p-0 ml-4"
-                                key={keyNest1}
-                              >
-                                <AccordionItem
-                                  className="relative border-b-0 h-fit"
-                                  value={`item-${itemNest1}`}
-                                >
-                                  <AccordionTrigger className="ml-[16px] cursor-pointer h-8 flex items-center hover:no-underline">
-                                    <div className="flex items-center">
-                                      <div className="flex items-center justify-center text-xs text-gray-600 font-light  bg-resd-100 leading-none w-[38px] mt-[2px] ">
-                                        {key + 1}.{keyNest1 + 1}
-                                      </div>
-                                      <div
-                                        className={` ${
-                                          itemNest1.children
-                                            ? "hover:underline"
-                                            : ""
-                                        }`}
-                                      >
-                                        {itemNest1.name}
-                                      </div>
-                                    </div>
-                                  </AccordionTrigger>
-
-                                  {/* Content */}
-                                  {itemNest1.children ? (
-                                    <AccordionContent className="mt-2">
-                                      {itemNest1.children
-                                        ? itemNest1.children.map(
-                                            (itemNest2, keyNest2) => {
-                                              return (
-                                                <div
-                                                  key={keyNest2}
-                                                  className="relative ml-4 mb-2 flex items-center text-xs bg-redd-400 h-5"
-                                                >
-                                                  <div className="ml-6 mr-2 text-gray-400 font-light">
-                                                    {key}.{keyNest1}.{keyNest2}
-                                                  </div>
-                                                  <div>{itemNest2.name}</div>
-
-                                                  {/* Absolute elements */}
-                                                  {/* Edit Button */}
-                                                  <button
-                                                    onClick={() => {
-                                                      setActiveItem(item);
-                                                      setOpenEditModal(true);
-                                                      setNestCount([
-                                                        key,
-                                                        keyNest1,
-                                                        keyNest2,
-                                                      ]);
-                                                    }}
-                                                    className="absolute top-0 h-5 z-10 cursor-pointer"
-                                                  >
-                                                    <PenBox size={16} />
-                                                  </button>
-                                                </div>
-                                              );
-                                            }
-                                          )
-                                        : ""}
-                                    </AccordionContent>
-                                  ) : (
-                                    <AccordionContent>
-                                      {/* Add button if no Level 2 chapters */}
-                                      <button
-                                        onClick={() => {
-                                          setActiveItem(item);
-                                          setNestCount([key]);
-                                          setActionToDo("add");
-                                          setOpenEditModal(true);
-                                        }}
-                                        className="top-0 h-8 z-10 cursor-pointer text-sm"
-                                      >
-                                        Add sectionSfdfd
-                                      </button>
-                                    </AccordionContent>
-                                  )}
-
-                                  {/* Absolute elements */}
-                                  {/* Edit Button */}
-                                  <button
-                                    onClick={() => {
-                                      setActiveItem(item);
-                                      setOpenEditModal(true);
-                                      setNestCount([key, keyNest1]);
-                                    }}
-                                    className="absolute top-0 h-8 z-10 cursor-pointer"
-                                  >
-                                    <PenBox size={16} />
-                                  </button>
-
-                                  {/* Add button for more level 2 chapters */}
-                                  {keyNest1 ===
-                                  chapters[keyNest1].children!.length - 1 ? (
-                                    <button
-                                      onClick={() => {
-                                        setActiveItem(item);
-                                        setNestCount([key, keyNest1]);
-                                        setActionToDo("add");
-                                        setOpenEditModal(true);
-                                      }}
-                                      className="top-0 h-8 z-10 cursor-pointer text-sm"
-                                    >
-                                      Add sectionXX
-                                    </button>
-                                  ) : (
-                                    ""
-                                  )}
-                                </AccordionItem>
-                              </Accordion>
-                            );
-                          })
-                        : ""}
-                    </AccordionContent>
-                  ) : (
-                    <AccordionContent>
-                      {/* Add button if no level 2 chapters */}
-                      {key === chapters.length - 1 ? (
-                        <button
-                          onClick={() => {
-                            setActiveItem(item);
-                            setNestCount([key]);
-                            setActionToDo("add");
-                            setOpenEditModal(true);
-                          }}
-                          className="top-0 h-8 z-10 cursor-pointer text-sm ml-5"
-                        >
-                          Add sections LV 2
-                        </button>
-                      ) : (
-                        ""
-                      )}
-                    </AccordionContent>
-                  )}
+                  </div>
 
                   {/* Absolute elements */}
-                  {/* Edit Chapter Button */}
+                  {/* Edit Edit Button */}
                   <button
                     onClick={() => {
                       setActiveItem(item);
@@ -547,7 +399,7 @@ const TableOfContents = ({ pageData }: TableOfContents) => {
                     <PenBox size={16} />
                   </button>
 
-                  {/* Add button for level 1 chapters */}
+                  {/* Add Button, added to end of last element*/}
                   {key === chapters.length - 1 ? (
                     <button
                       onClick={() => {
@@ -563,7 +415,7 @@ const TableOfContents = ({ pageData }: TableOfContents) => {
                   ) : (
                     ""
                   )}
-                </AccordionItem>
+                </div>
               );
             })}
           </Accordion>
@@ -659,6 +511,9 @@ const BookUpload = () => {
       ],
     },
   ]);
+  const [authorArray, setAuthorArray] = useState([]);
+
+  const [authorsSearch, setAuthorsSearch] = useState([]);
 
   const createBook = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -721,10 +576,11 @@ const BookUpload = () => {
       });
 
       // Iterate and populate authors list
-      target.bookAuthors.value.split(",").forEach((author, key) => {
-        console.log(`Appended: books[0][author][${key}] - ${author}`);
-        formData.append(`books[0][authors][${key}]`, author);
-      });
+      // target.bookAuthors.value.split(",").forEach((author, key) => {
+      //   console.log(`Appended: books[0][author][${key}] - ${author}`);
+      //   formData.append(`books[0][authors][${key}]`, author);
+      // });
+      formData.append(`books[0][authors][1]`, "1");
 
       // Book Cover Image
       formData.append("books[0][cover_image]", target.bookCover.files[0]);
@@ -757,7 +613,24 @@ const BookUpload = () => {
     } catch (error) {
       console.log(error);
       setLoading(null);
+      toast.error("An error occured", {
+        richColors: true,
+        position: "bottom-left",
+      });
     }
+  };
+
+  const searchUser = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+
+    const target = e.target as typeof e.target & {
+      value: string;
+    };
+
+    const targetResult = authors.filter((item) =>
+      item.name.includes(target.value)
+    );
+    setAuthorsSearch(targetResult);
   };
 
   return (
@@ -882,14 +755,36 @@ const BookUpload = () => {
         />
 
         {/* Authors */}
-        <Input
-          name="bookAuthors"
-          type="text"
-          label="Book Authors"
-          placeholder="Enter a list of audience"
-          defaultValue="1"
-          required
-        />
+
+        <div className="w-full relative">
+          <Input
+            name="bookAuthors"
+            type="text"
+            label="Book Authors"
+            placeholder="Enter a list of audience"
+            defaultValue="1"
+            onChange={(e) => searchUser(e)}
+            required
+          />
+
+          {authorsSearch.length > 0 ? (
+            <div className="absolute top-[5rem] left-0 min-h-12 w-full bg-white border rounded-md p-2">
+              {authorsSearch.slice(0, 4).map((item, key) => {
+                return (
+                  <div
+                    key={key}
+                    className="text-sm hover:bg-gray-100 cursor-pointer px-3 rounded-md py-[5px]"
+                    onClick={() => setAuthorsSearch([])}
+                  >
+                    {item.name}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            ""
+          )}
+        </div>
 
         {/* Publisher */}
         <Input
