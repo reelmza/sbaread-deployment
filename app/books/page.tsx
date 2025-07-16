@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { CheckCircle2, Search, Upload } from "lucide-react";
+import { CheckCircle2, ChevronDownIcon, Search, Upload } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +26,15 @@ import { toast } from "sonner";
 import Spinner from "@/components/Spinner";
 import PageLoading from "@/components/PageLoading";
 import PageError from "@/components/PageError";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Book = {
   id: number;
@@ -44,6 +53,7 @@ type Book = {
   approved_by: number;
   currency: string;
   discounted_price: string;
+  actual_price: string;
 };
 
 type BookType = {
@@ -78,8 +88,8 @@ const Book = ({ book, setActiveBook, setModalState }: BookType) => {
           </div>
         </div>
 
-        <div className="w-20 flex items-center justify-center bg-accent text-sm rounded-full h-8 font-semibold">
-          #10,000
+        <div className="w-20 flex items-center justify-center bg-accent text-sm rounded-full h-8 font-semibold shrink-0">
+          ${book.actual_price}
         </div>
       </div>
     </div>
@@ -91,6 +101,7 @@ const Books = () => {
   const [pageData, setPageData] = useState<Book[] | null>(null);
   const [activeBook, setActiveBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState<string | null>("page");
+
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -99,7 +110,7 @@ const Books = () => {
       attachHeaders(session!.user.token);
       console.log(session);
       try {
-        const res = await localAxios.get("/books");
+        const res = await localAxios.get("/books/all");
         console.log(res);
         if (res.status === 200) {
           const data = res.data.data;
@@ -119,22 +130,43 @@ const Books = () => {
   }, [session]);
 
   const changeBookStatus = async (id: number, action: string) => {
-    setLoading(`${action === "approve" ? "approveBook" : "declineBook"}`);
+    setLoading(`changeBookStatus`);
     try {
       attachHeaders(session!.user.token);
-      const res = await localAxios.post(`/books/${action}/${id}`, {
-        note: "Not qualitative enough.",
-      });
+      let res;
 
-      console.log(res);
-      if (res.status === 200 || res.status === 201) {
-        toast.success(
-          `Book ${action == "approve" ? "approved" : "declined"} successfully`,
+      if (action !== "deleted") {
+        res = await localAxios.post(
+          `/books/${action.slice(0, action.length - 1)}/${id}`,
           {
-            richColors: true,
-            position: "bottom-left",
+            review_notes: "Not qualitative enough.",
           }
         );
+      } else {
+        res = await localAxios.post(
+          `/books/${id}/${action.slice(0, action.length - 1)}`,
+          { reason: "Book is against our policy." }
+        );
+      }
+
+      if (res.status === 200 || res.status === 201) {
+        toast.success(`Book ${action} successfully`, {
+          richColors: true,
+          position: "bottom-left",
+        });
+
+        setPageData((prev) => {
+          let newData = [...(prev as Book[])];
+
+          if (action === "deleted") {
+            const safeBooks = newData!.filter((book) => book.id !== id);
+            setModalState(false);
+            return [...safeBooks];
+          } else {
+            newData!.find((book) => book.id === id)!.status = action;
+            return [...newData];
+          }
+        });
       }
 
       setLoading(null);
@@ -275,7 +307,7 @@ const Books = () => {
 
               {/* Heading */}
               <div className="w-full flex items-center justify-between">
-                <div className="flex gap-4 items-center">
+                <div className="flex gap-4 items-center w-[70%]">
                   <Image
                     src={activeBook?.cover_image.public_url || "/woman.jpg"}
                     alt="African Woman"
@@ -289,13 +321,65 @@ const Books = () => {
                       {activeBook?.title}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {activeBook?.sub_title}
+                      {activeBook?.sub_title.slice(0, 80)}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <button
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className={`outline-none cursor-pointer h-10 border w-38 rounded-md text-sm text-gray-800 flex items-center justify-center gap-2
+                          ${
+                            loading === "changeBookStatus"
+                              ? "opacity-75 pointer-events-none"
+                              : ""
+                          }`}
+                        disabled={loading === "changeBookStatus"}
+                      >
+                        <span>Manage Book</span>
+                        {loading === "changeBookStatus" ? (
+                          <Spinner className="size-4 " />
+                        ) : (
+                          <ChevronDownIcon size={16} />
+                        )}
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-38 mt-1">
+                      <DropdownMenuRadioGroup
+                        // defaultValue={activeBook?.status}
+                        value={activeBook?.status}
+                        onValueChange={(val) => {
+                          changeBookStatus(activeBook!.id, val);
+                        }}
+                      >
+                        <DropdownMenuRadioItem
+                          value="approved"
+                          className="hover:text-emerald-600 cursor-pointer"
+                        >
+                          Approve
+                        </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem
+                          value="declined"
+                          className="hover:text-orange-600 cursor-pointer"
+                        >
+                          Decline
+                        </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem
+                          value="deleted"
+                          className={`hover:text-red-600 cursor-pointer ${
+                            activeBook?.status !== "declined"
+                              ? "opacity-75 pointer-events-none"
+                              : ""
+                          }`}
+                        >
+                          Delete
+                        </DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  {/* <button
                     className={`h-8 w-28 bg-emerald-600 rounded-md text-white text-sm cursor-pointer flex items-center justify-center gap-2 ${
                       loading === "approveBook"
                         ? "opacity-50 pointer-events-none"
@@ -326,7 +410,7 @@ const Books = () => {
                     ) : (
                       ""
                     )}
-                  </button>
+                  </button> */}
                 </div>
               </div>
 

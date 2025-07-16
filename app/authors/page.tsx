@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Search, UserRoundX } from "lucide-react";
+import { ChevronDownIcon, Eye, Search, UserRoundX } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import {
@@ -16,70 +16,38 @@ import Spinner from "@/components/Spinner";
 import PageLoading from "@/components/PageLoading";
 import PageError from "@/components/PageError";
 import ThemeSpacer from "@/components/ThemeSpacer";
+import { attachHeaders, localAxios } from "@/lib/axios";
+import { SessionProvider, useSession } from "next-auth/react";
+import { sign } from "crypto";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { AxiosError } from "axios";
+
+type Application = {
+  id: string;
+  name: string;
+  email: string;
+  address: string;
+  email_verified_at: string;
+  status: string;
+};
 const Page = () => {
+  const { data: session } = useSession();
+  const controller = new AbortController();
+
   const [loading, setLoading] = useState<string | null>("page");
   const [pageData, setPageData] = useState<{
     applications: {}[];
     tableData: {}[];
   } | null>(null);
 
-  const applications = [
-    {
-      id: 7,
-      name: "Grace Nwosu",
-      email: "grace.nwosu@example.com",
-      documents: {
-        idCard: "https://example.com/docs/id/grace-nwosu-id.png",
-        address: "https://example.com/docs/address/grace-nwosu-address.png",
-      },
-      emailVerfiied: true,
-      address: "1019 Gimbiya, Area 1, Garki",
-    },
-    {
-      id: 3,
-      name: "Samuel Adigun",
-      email: "samuel.adigun@example.com",
-      documents: {
-        idCard: "https://example.com/docs/id/samuel-adigun-id.png",
-        address: "https://example.com/docs/address/samuel-adigun-address.png",
-      },
-      emailVerfiied: false,
-      address: "10 Cadastral Zone, Utako",
-    },
-    {
-      id: 12,
-      name: "Aisha Bello",
-      email: "aisha.bello@example.com",
-      documents: {
-        idCard: "https://example.com/docs/id/aisha-bello-id.png",
-        address: "https://example.com/docs/address/aisha-bello-address.png",
-      },
-      emailVerfiied: false,
-      address: "4 Elias St, Wuye",
-    },
-    {
-      id: 18,
-      name: "Chinedu Okafor",
-      email: "chinedu.okafor@example.com",
-      documents: {
-        idCard: "https://example.com/docs/id/chinedu-okafor-id.png",
-        address: "https://example.com/docs/address/chinedu-okafor-address.png",
-      },
-      emailVerfiied: false,
-      address: "23 NAF Valley, Asokoro",
-    },
-    {
-      id: 5,
-      name: "Lilian Eze",
-      email: "lilian.eze@example.com",
-      documents: {
-        idCard: "https://example.com/docs/id/lilian-eze-id.png",
-        address: "https://example.com/docs/address/lilian-eze-address.png",
-      },
-      emailVerfiied: true,
-      address: "2 Sankara St, Wuse 2",
-    },
-  ];
+  const [applications, setApplications] = useState<Application[] | null>(null);
 
   const tableData = [
     {
@@ -150,21 +118,71 @@ const Page = () => {
     },
   ];
 
-  const changeAuthorStatus = async (id: number, action: string) => {};
+  const changeAuthorStatus = async (id: string, action: string) => {
+    setLoading("changeAuthorStatus");
+
+    try {
+      attachHeaders(session!.user.token);
+      const res = await localAxios.post(`user/profile/action/${action}/${id}`, {
+        signal: controller.signal,
+      });
+
+      if (res.data) {
+        console.log(res);
+
+        let newData = applications;
+        newData!.find((author) => author.id === id)!.status = action;
+        setApplications(newData);
+
+        setLoading(null);
+        toast.success(`Author set to ${action} successfully.`, {
+          richColors: true,
+          position: "bottom-left",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("An error occured", {
+        richColors: true,
+        position: "bottom-left",
+      });
+      setLoading(null);
+    }
+  };
 
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(null);
-      setPageData({
-        applications,
-        tableData,
-      });
-    }, 2000);
-  }, []);
+    if (!session) return;
+    const getData = async () => {
+      try {
+        attachHeaders(session!.user.token);
+        const res = await localAxios.get("/user/all?account_type=author", {
+          signal: controller.signal,
+        });
+
+        if (res.data) {
+          // console.log(res);
+          console.log(res);
+          setApplications(res.data.data.data);
+          setLoading(null);
+        }
+      } catch (error) {
+        console.log(error);
+        if ((error as AxiosError).message !== "canceled") {
+          setLoading("error");
+        }
+      }
+    };
+
+    getData();
+
+    return () => {
+      controller.abort();
+    };
+  }, [session]);
 
   return (
     <>
-      {loading !== "page" && pageData !== null ? (
+      {loading !== "page" && applications !== null ? (
         <div className="px-10">
           {/* Stats and Search Bar */}
           <div className="flex items-center justify-between mb-10">
@@ -193,11 +211,11 @@ const Page = () => {
             </div>
 
             <div className="w-full relative overflow-x-scroll flex items-center mb-10 gap-10 pb-2">
-              {applications.map((item) => {
+              {applications.map((item, key) => {
                 return (
                   <div
                     className="h-fit shadow-md shrink-0 w-2/8 flex flex-col items-center py-5 rounded-lg"
-                    key={applications.indexOf(item)}
+                    key={key}
                   >
                     <Image
                       src="/woman.jpg"
@@ -226,48 +244,132 @@ const Page = () => {
                               className="rounded-full"
                             />
 
-                            <div className="text-lg font-semibold">
-                              {item.name}
+                            <div className="">
+                              <div className="text-lg font-semibold">
+                                {item.name}
+                              </div>
+
+                              <div className="text-sm">
+                                {item.status.slice(0, 1).toUpperCase() +
+                                  item.status.slice(1, item.status.length)}
+                              </div>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-4">
-                            <button
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  className={`outline-none cursor-pointer h-10 border w-38 rounded-md text-sm text-gray-800 flex items-center justify-center gap-2
+                          ${
+                            loading === "changeBookStatus"
+                              ? "opacity-75 pointer-events-none"
+                              : ""
+                          }`}
+                                  disabled={loading === "changeBookStatus"}
+                                >
+                                  <span>Manage User</span>
+                                  {loading === "changeAuthorStatus" ? (
+                                    <Spinner className="size-4 " />
+                                  ) : (
+                                    <ChevronDownIcon size={16} />
+                                  )}
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="w-38 mt-1">
+                                <DropdownMenuRadioGroup
+                                  value={item?.status}
+                                  onValueChange={(val) => {
+                                    changeAuthorStatus(item!.id, val);
+                                  }}
+                                >
+                                  <DropdownMenuRadioItem
+                                    value="active"
+                                    className="hover:text-emerald-600 cursor-pointer"
+                                  >
+                                    Active
+                                  </DropdownMenuRadioItem>
+                                  <DropdownMenuRadioItem
+                                    value="verified"
+                                    className="hover:text-emerald-600 cursor-pointer"
+                                  >
+                                    Verified
+                                  </DropdownMenuRadioItem>
+                                  <DropdownMenuRadioItem
+                                    value="pending"
+                                    className="hover:text-orange-600 cursor-pointer"
+                                  >
+                                    Pending
+                                  </DropdownMenuRadioItem>
+                                  <DropdownMenuRadioItem
+                                    value="suspended"
+                                    className={`hover:text-red-600 cursor-pointer ${
+                                      item?.status !== "declined"
+                                        ? "opacity-75 pointer-events-none"
+                                        : ""
+                                    }`}
+                                  >
+                                    Suspended
+                                  </DropdownMenuRadioItem>
+                                  <DropdownMenuRadioItem
+                                    value="banned"
+                                    className={`hover:text-red-600 cursor-pointer ${
+                                      item?.status !== "declined"
+                                        ? "opacity-75 pointer-events-none"
+                                        : ""
+                                    }`}
+                                  >
+                                    Banned
+                                  </DropdownMenuRadioItem>
+                                  <DropdownMenuRadioItem
+                                    value="rejected"
+                                    className={`hover:text-red-600 cursor-pointer ${
+                                      item?.status !== "declined"
+                                        ? "opacity-75 pointer-events-none"
+                                        : ""
+                                    }`}
+                                  >
+                                    Rejected
+                                  </DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                            {/* <button
                               className={`h-8 w-28 bg-emerald-600 rounded-md text-white text-sm cursor-pointer flex items-center justify-center gap-2 ${
                                 loading === "approveAuthor"
                                   ? "opacity-50 pointer-events-none"
                                   : ""
                               }`}
                               onClick={() =>
-                                changeAuthorStatus(item!.id, "approve")
+                                changeAuthorStatus(item!.id, "verified")
                               }
                               disabled={loading !== null}
                             >
                               <span>Approve</span>
-                              {loading === "approveBook" ? (
+                              {loading === "approveAuthor" ? (
                                 <Spinner className="size-4" />
                               ) : (
                                 ""
                               )}
                             </button>
                             <button
-                              className={`h-8 w-28 bg-red-600 rounded-md text-white text-sm cursor-pointer flex items-center justify-center gap-2 ${
+                              className={`h-8 w-28 bg-orange-600 rounded-md text-white text-sm cursor-pointer flex items-center justify-center gap-2 ${
                                 loading === "declineAuthor"
                                   ? "opacity-50 pointer-events-none"
                                   : ""
                               }`}
                               onClick={() =>
-                                changeAuthorStatus(item!.id, "decline")
+                                changeAuthorStatus(item!.id, "pending")
                               }
                               disabled={loading !== null}
                             >
-                              <span>Decline</span>
-                              {loading === "declinrAuthor" ? (
+                              <span>Revert</span>
+                              {loading === "declineAuthor" ? (
                                 <Spinner className="size-4" />
                               ) : (
                                 ""
                               )}
-                            </button>
+                            </button> */}
                           </div>
                         </div>
 
@@ -290,13 +392,13 @@ const Page = () => {
                           {/* Address */}
                           <div className="w-[48%] text-sm">
                             <div className="font-semibold">Address</div>
-                            <div>{item.address}</div>
+                            <div>{item.address || "No address"}</div>
                           </div>
 
                           {/* Emil Verify Status */}
                           <div className="w-[48%] text-sm">
                             <div className="font-semibold">Email Verified</div>
-                            <div>{item.emailVerfiied ? "Yes" : "No"}</div>
+                            <div>{item.email_verified_at ? "Yes" : "No"}</div>
                           </div>
                         </div>
 
@@ -310,12 +412,14 @@ const Page = () => {
                         <div className="flex items-center flex-wrap gap-y-2 gap-x-5">
                           {/* idCard */}
                           <div className="w-fit h-5 flex items-center  text-xs rounded-full px-2 bg-blue-100 text-blue-700 hover:bg-blue-200 cursor-pointer">
-                            {item.documents.idCard.slice(0, 23) + "..."}
+                            {/* {item.documents.idCard.slice(0, 23) + "..."} */}
+                            https://res.cloudinary.com/so...
                           </div>
 
                           {/* idCard */}
                           <div className="w-fit h-5 flex items-center  text-xs rounded-full px-2 bg-blue-100 text-blue-700 hover:bg-blue-200 cursor-pointer">
-                            {item.documents.address.slice(0, 23) + "..."}
+                            {/* {item.documents.address.slice(0, 23) + "..."} */}
+                            https://res.cloudinary.com/so...
                           </div>
                         </div>
                       </DialogContent>
@@ -391,4 +495,12 @@ const Page = () => {
   );
 };
 
-export default Page;
+const PageWrapper = () => {
+  return (
+    <SessionProvider>
+      <Page />
+    </SessionProvider>
+  );
+};
+
+export default PageWrapper;

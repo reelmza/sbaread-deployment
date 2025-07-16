@@ -451,6 +451,7 @@ const TableOfContents = ({ pageData }: TableOfContents) => {
 
 const BookUpload = () => {
   const { data: session } = useSession();
+  let controller: AbortController;
 
   const authorsSearchInput = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState<string | null>(null);
@@ -549,7 +550,7 @@ const BookUpload = () => {
       formData.append("books[0][title]", target.bookTitle.value);
       formData.append("books[0][sub_title]", target.bookSubtitle.value);
       formData.append("books[0][description]", target.bookAbout.value);
-      formData.append("books[0][author_id]", session!.user.id);
+      formData.append("books[0][author_id]", selectedAuthors[0].id.toString());
       formData.append("books[0][publisher]", target.bookPublisher.value);
 
       formData.append("books[0][isbn]", target.bookISBN.value);
@@ -563,11 +564,21 @@ const BookUpload = () => {
       );
 
       // Table of contents
-      formData.append("books[0][table_of_contents][0][index]", " Chapter 1");
       formData.append(
-        "books[0][table_of_contents][0][description]",
-        "Stack Data Structures"
+        "books[0][table_of_contents]",
+        JSON.stringify([
+          {
+            title: "Chapter 1",
+            description: "Some description",
+          },
+        ])
       );
+
+      // formData.append("books[0][table_of_contents][0][index]", "Chapter 1");
+      // formData.append(
+      //   "books[0][table_of_contents][0][description]",
+      //   "Stack Data Structures"
+      // );
 
       // Iterate and populate book tags list
       target.bookTags.value.split(",").forEach((tag, key) => {
@@ -582,11 +593,11 @@ const BookUpload = () => {
       });
 
       // Iterate and populate authors list
+      // console.log(selectedAuthors);
       selectedAuthors.forEach((author, key) => {
-        console.log(`Appended: books[0][author][${key}] - ${author}`);
+        console.log(`Appended: books[0][author][${key}] - ${author.id}`);
         formData.append(`books[0][authors][${key}]`, author.id);
       });
-      // formData.append(`books[0][authors][1]`, "1");
 
       // Book Cover Image
       formData.append("books[0][cover_image]", target.bookCover.files[0]);
@@ -610,11 +621,12 @@ const BookUpload = () => {
       attachHeaders(session!.user.token, "multipart/form-data");
       const res = await localAxios.post("/books", formData());
 
-      if (res.status === 201) {
-        toast.success("Book has been created successfully", {
+      if (res.data) {
+        toast.success("Book has been created successfully.", {
           richColors: true,
           position: "bottom-left",
         });
+        setLoading(null);
       }
     } catch (error) {
       console.log(error);
@@ -634,24 +646,49 @@ const BookUpload = () => {
     setSelectedAuthors(filter);
   };
 
-  const searchUser = (e: React.SyntheticEvent) => {
+  const searchUser = async (e: React.SyntheticEvent) => {
     e.preventDefault();
 
+    // Cancel previous request if any
+    if (controller) {
+      console.log(controller);
+      controller.abort();
+    }
+
+    // Initiate new controller
+    controller = new AbortController();
+    const signal = controller.signal;
+
+    // Get value of input
     const target = e.target as typeof e.target & {
       value: string;
     };
+    setLoading("searchUser");
+    try {
+      attachHeaders(session!.user.token);
+      const res = await localAxios.get(
+        `/user/all?account_type=author&search=${encodeURIComponent(
+          target.value.toUpperCase()
+        )}`,
+        {
+          signal,
+        }
+      );
 
-    const targetResult = authors.filter((item) =>
-      item.name.includes(target.value)
-    );
-
-    setAuthorsSearch(targetResult);
+      if (res.data) {
+        setAuthorsSearch(res.data.data.data);
+        setLoading(null);
+      }
+    } catch (error) {
+      console.log(error);
+      setLoading(null);
+    }
   };
 
   return (
     <form className="px-10 w-full flex justify-between" onSubmit={createBook}>
       {/* Images Upload */}
-      <div className="w-[25%] bg-amsber-100">
+      <div className="w-[25%]">
         <div className="fixed w-[calc(25%-5rem)] top-28">
           {/* Book Cover */}
           <FormFileUpload
@@ -711,7 +748,7 @@ const BookUpload = () => {
       </div>
 
       {/* Book Details */}
-      <div className="w-[70%] bg-ambesr-100">
+      <div className="w-[70%]">
         {/* Book Title */}
         <Input
           name="bookTitle"
@@ -770,9 +807,8 @@ const BookUpload = () => {
         />
 
         {/* Authors */}
-
         <div className="w-full flex flex-col">
-          {/* Author Lable */}
+          {/* Author Label */}
           <label htmlFor="bookAuthors" className="text-sm mb-2">
             Book Authors
           </label>
@@ -808,8 +844,11 @@ const BookUpload = () => {
               className="bg-transparent border-none outline-none text-sm"
               defaultValue=""
               ref={authorsSearchInput}
-              onChange={(e) => searchUser(e)}
-              required
+              onChange={(e) => {
+                // controller.abort();
+                searchUser(e);
+              }}
+              // required
             />
 
             {/* Search drop down */}
@@ -839,7 +878,16 @@ const BookUpload = () => {
                 })}
               </div>
             ) : (
-              ""
+              <>
+                {loading === "searchUser" ? (
+                  <div className="absolute top-[3.5rem] left-0 min-h-12 w-full bg-white border rounded-md p-2 flex items-center gap-2">
+                    <Spinner className="size-4" />
+                    <span className="text-sm"> Searching Authors</span>
+                  </div>
+                ) : (
+                  ""
+                )}
+              </>
             )}
           </div>
         </div>
