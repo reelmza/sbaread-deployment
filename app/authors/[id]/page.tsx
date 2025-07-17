@@ -1,7 +1,8 @@
 import Image from "next/image";
 import React from "react";
 
-const Page = async ({ params }: { params: { id: number } }) => {
+const Page = async (props: { params: Promise<{ id: number }> }) => {
+  const params = await props.params;
   const { id } = params;
   const tableData = [
     {
