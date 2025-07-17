@@ -11,6 +11,7 @@ import {
 } from "./ui/dialog";
 import { useState } from "react";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 
 const Header = () => {
   const [profileState, setProfileState] = useState(false);
@@ -53,7 +54,7 @@ const Header = () => {
 
                 <div
                   className={`w-48 absolute -bottom-24 right-10 p-2 border bg-white rounded-md shadow text-sm ${
-                    profileState ? "opacity-100" : "opacity-0"
+                    profileState ? "opacity-100" : "opacity-0 hidden"
                   } transition-all ease-in-out duration-500`}
                 >
                   <Link href="/profile">
@@ -62,9 +63,12 @@ const Header = () => {
                     </div>
                   </Link>
 
-                  <div className="w-full h-8 hover:bg-neutral-100 cursor-pointer rounded-md flex items-center px-2 text-red-600">
+                  <button
+                    className="w-full h-8 hover:bg-neutral-100 cursor-pointer rounded-md flex items-center px-2 text-red-600"
+                    onClick={() => signOut({ redirectTo: "/" })}
+                  >
                     Logout
-                  </div>
+                  </button>
                 </div>
               </div>
 

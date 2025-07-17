@@ -1,5 +1,5 @@
 type ThemeSpacer = {
-  size: string;
+  size: "unit" | "element" | "component" | "section";
 };
 
 const ThemeSpacer = ({ size }: ThemeSpacer) => {

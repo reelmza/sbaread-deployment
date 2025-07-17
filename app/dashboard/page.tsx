@@ -1,14 +1,24 @@
-// pages/dashboard.tsx
+"use client";
 import { BookOpen, Send, Wallet } from "lucide-react";
+import { SessionProvider, useSession } from "next-auth/react";
 import React from "react";
+
+const SessionLogger = () => {
+  const session = useSession();
+  console.log(session);
+  return null;
+};
 
 const Dashboard = () => {
   return (
     <div className="w-full h-full flex flex-col">
+      <SessionProvider>
+        <SessionLogger />
+      </SessionProvider>
       {/* Card and Stats */}
       <div className="flex justify-between w-full px-10 mb-10">
         {/* Card */}
-        <div className="w-7/12 bg-accent-light text-white p-8 rounded-md">
+        <div className="w-7/12 bg-accent text-white p-8 rounded-md">
           {/* Welcome Text */}
           <div className="mb-10">
             <div className="text-3xl font-semibold">Welcome Back, Theo</div>
@@ -38,10 +48,6 @@ const Dashboard = () => {
                   />
                 </svg>
               </div>
-            </div>
-            <div className="w-full flex items-center">
-              <div className="w-[80%] h-2 bg-accent-tint rounded"></div>
-              <span className="ml-2 text-sm">80%</span>
             </div>
           </div>
         </div>

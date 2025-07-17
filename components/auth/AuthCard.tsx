@@ -1,5 +1,5 @@
 import React from "react";
-import ThemeSpacer from "./ThemeSpacer";
+import ThemeSpacer from "../ThemeSpacer";
 import { LogOutIcon } from "lucide-react";
 
 const AuthCard = ({
