@@ -2,7 +2,7 @@ import Image from "next/image";
 import React from "react";
 
 const Page = async ({ params }: { params: { id: number } }) => {
-  const { id } = await params;
+  const { id } = params;
   const tableData = [
     {
       username: "reelMza342",
