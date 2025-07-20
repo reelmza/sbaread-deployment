@@ -309,7 +309,7 @@ const Books = () => {
               <div className="w-full flex items-center justify-between">
                 <div className="flex gap-4 items-center w-[70%]">
                   <Image
-                    src={activeBook?.cover_image.public_url || "/woman.jpg"}
+                    src={activeBook?.cover_image.public_url || "/user.png"}
                     alt="African Woman"
                     width={50}
                     height={50}

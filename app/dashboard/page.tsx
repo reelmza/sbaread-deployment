@@ -61,7 +61,7 @@ const Dashboard = () => {
           {/* Card and Stats */}
           <div className="flex justify-between w-full px-10 mb-10">
             {/* Card */}
-            <div className="w-7/12 bg-accent text-white p-8 rounded-md">
+            <div className="w-7/12 bg-accent text-white p-8 rounded">
               {/* Welcome Text */}
               <div className="mb-5">
                 <div className="text-3xl font-bold">Welcome Back, Admin</div>
@@ -176,7 +176,7 @@ const Dashboard = () => {
                   <div className="font-semibold text-accent-dark">
                     Books Uploaded
                   </div>
-                  <div className="h-5 flex items-center justify-center px-3 rounded-md text-sm bg-neutral-50">
+                  <div className="h-5 flex items-center justify-center px-3 rounded text-sm bg-neutral-50">
                     {pageData.recent_book_uploads.length}
                   </div>
                 </div>
@@ -226,7 +226,7 @@ const Dashboard = () => {
                   <div className="font-semibold text-accent-dark">
                     Recent Signups
                   </div>
-                  <div className="h-5 flex items-center justify-center px-3 rounded-md text-sm bg-neutral-50">
+                  <div className="h-5 flex items-center justify-center px-3 rounded text-sm bg-neutral-50">
                     {pageData.recent_signups.length}
                   </div>
                 </div>
@@ -274,7 +274,7 @@ const Dashboard = () => {
                   <div className="font-semibold text-accent-dark">
                     Recent Transactions
                   </div>
-                  <div className="h-5 flex items-center justify-center px-3 rounded-md text-sm bg-neutral-50">
+                  <div className="h-5 flex items-center justify-center px-3 rounded text-sm bg-neutral-50">
                     {pageData.recent_transactions.length}
                   </div>
                 </div>
