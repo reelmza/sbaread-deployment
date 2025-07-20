@@ -123,7 +123,7 @@ const Page = ({ id }: { id: number }) => {
 };
 
 type PageWrapperType = {
-  params: Usable<{ id: number }>;
+  params: Promise<any>;
 };
 
 const PageWrapper = ({ params }: PageWrapperType) => {

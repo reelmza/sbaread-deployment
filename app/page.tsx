@@ -92,7 +92,7 @@ export default function Home() {
         <ThemeSpacer size="element" />
         <div className="self-end">
           <Link href={"/reset-password"} className="text-neutral-dark">
-            Reset Password?
+            Forgot Password?
           </Link>
         </div>
         <ThemeSpacer size="element" />
