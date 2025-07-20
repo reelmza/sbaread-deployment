@@ -36,87 +36,26 @@ type Application = {
   address: string;
   email_verified_at: string;
   status: string;
+  kyc_info: {
+    id: number;
+    user_id: number;
+    first_name: string;
+    last_name: string;
+    phone: string;
+    gender: string;
+    city: string;
+    state: string;
+    conuntry: string;
+    dob: string;
+  };
 };
+
 const Page = () => {
   const { data: session } = useSession();
   const controller = new AbortController();
 
   const [loading, setLoading] = useState<string | null>("page");
-  const [pageData, setPageData] = useState<{
-    applications: {}[];
-    tableData: {}[];
-  } | null>(null);
-
   const [applications, setApplications] = useState<Application[] | null>(null);
-
-  const tableData = [
-    {
-      username: "reelMza342",
-      email: "jessemoses@yahoo.com",
-      phone: "0905533222",
-      membership: "basic",
-    },
-    {
-      username: "techieJen01",
-      email: "jen.techie@gmail.com",
-      phone: "0812345678",
-      membership: "premium",
-    },
-    {
-      username: "alphaZed93",
-      email: "alpha93@protonmail.com",
-      phone: "0709876543",
-      membership: "basic",
-    },
-    {
-      username: "novaSpark88",
-      email: "nova88@hotmail.com",
-      phone: "0801122334",
-      membership: "gold",
-    },
-    {
-      username: "cyberLion77",
-      email: "lion_77@outlook.com",
-      phone: "0812233445",
-      membership: "basic",
-    },
-    {
-      username: "greenLeaf21",
-      email: "leafy21@gmail.com",
-      phone: "0903344556",
-      membership: "premium",
-    },
-    {
-      username: "zenithRex45",
-      email: "rex.zenith45@yahoo.com",
-      phone: "0704455667",
-      membership: "gold",
-    },
-    {
-      username: "echoBeta09",
-      email: "beta09@live.com",
-      phone: "0805566778",
-      membership: "basic",
-    },
-    {
-      username: "urbanFlare66",
-      email: "urban66@ymail.com",
-      phone: "0816677889",
-      membership: "premium",
-    },
-    {
-      username: "codeVibe55",
-      email: "code.vibe55@gmail.com",
-      phone: "0907788990",
-      membership: "basic",
-    },
-    {
-      username: "astroWave19",
-      email: "astro19@icloud.com",
-      phone: "0708899001",
-      membership: "gold",
-    },
-  ];
 
   const changeAuthorStatus = async (id: string, action: string) => {
     setLoading("changeAuthorStatus");
@@ -155,9 +94,12 @@ const Page = () => {
     const getData = async () => {
       try {
         attachHeaders(session!.user.token);
-        const res = await localAxios.get("/user/all?account_type=author", {
-          signal: controller.signal,
-        });
+        const res = await localAxios.get(
+          "/user/all?account_type=author&per_page=70",
+          {
+            signal: controller.signal,
+          }
+        );
 
         if (res.data) {
           // console.log(res);
@@ -187,9 +129,9 @@ const Page = () => {
           {/* Stats and Search Bar */}
           <div className="flex items-center justify-between mb-10">
             <div>
-              <div className="text-accent-dark font-semibold flex items-center">
+              {/* <div className="text-accent-dark font-semibold flex items-center">
                 No. of Authors: <div className="text-accent ml-2">50</div>
-              </div>
+              </div> */}
             </div>
 
             <div className="h-12 w-72 bg-gray-100 rounded-md flex items-center">
@@ -199,7 +141,7 @@ const Page = () => {
               <input
                 type="text"
                 className="grow bg-transparent outline-none text-neutral-600 text-sm"
-                placeholder="Search for a reader"
+                placeholder="Search for an author"
               />
             </div>
           </div>
@@ -218,7 +160,7 @@ const Page = () => {
                     key={key}
                   >
                     <Image
-                      src="/woman.jpg"
+                      src="/user.png"
                       alt="An african woman"
                       width={80}
                       height={80}
@@ -237,7 +179,7 @@ const Page = () => {
                         <div className="w-full flex items-center justify-between">
                           <div className="flex gap-4 items-center">
                             <Image
-                              src={"/woman.jpg"}
+                              src={"/user.png"}
                               alt="African Woman"
                               width={48}
                               height={48}
@@ -432,6 +374,9 @@ const Page = () => {
 
           {/* Table */}
           <div className="w-full">
+            <div className="text-accent-dark font-semibold mb-5">
+              Verified Authors
+            </div>
             {/* Table Heading */}
             <div className="grid grid-cols-12 bg-accent h-12 items-center px-5 rounded-t-2xl font-semibold text-white">
               {/* Serial */}
@@ -449,40 +394,38 @@ const Page = () => {
               {/* Action */}
               <div className="col-span-2">Action</div>
             </div>
-
             {/* Table Content */}
-            {tableData.map((item) => {
-              return (
-                <div
-                  className={`grid grid-cols-12 h-12 items-center px-5 text-gray-600 text-sm ${
-                    tableData.indexOf(item) % 2 === 0 ? "bg-gray-50" : ""
-                  }`}
-                  key={tableData.indexOf(item)}
-                >
-                  {/* Serial */}
-                  <div className="col-span-1">
-                    {tableData.indexOf(item) + 1}
+            {applications
+              .filter((entry) => entry.kyc_info !== null)
+              .map((item, key) => {
+                return (
+                  <div
+                    className={`grid grid-cols-12 h-12 items-center px-5 text-gray-600 text-sm ${
+                      key % 2 === 0 ? "bg-gray-50" : ""
+                    }`}
+                    key={key}
+                  >
+                    {/* Serial */}
+                    <div className="col-span-1">{key + 1}</div>
+
+                    {/* Username */}
+                    <div className="col-span-3">{`${item.kyc_info.first_name} ${item.kyc_info.last_name}`}</div>
+
+                    {/* Email Address */}
+                    <div className="col-span-3">{item.email}</div>
+
+                    {/* Phone Number */}
+                    <div className="col-span-3">{item.kyc_info.phone}</div>
+
+                    {/* Action */}
+                    <div className="col-span-2 flex items-center gap-2">
+                      <Link href={`/authors/${item.kyc_info.user_id}`}>
+                        Manage
+                      </Link>
+                    </div>
                   </div>
-
-                  {/* Username */}
-                  <div className="col-span-3">{item.username}</div>
-
-                  {/* Email Address */}
-                  <div className="col-span-3">{item.email}</div>
-
-                  {/* Phone Number */}
-                  <div className="col-span-3">{item.phone}</div>
-
-                  {/* Action */}
-                  <div className="col-span-2 flex items-center gap-2">
-                    <Link href={`/authors/${tableData.indexOf(item)}`}>
-                      <Eye size={20} strokeWidth={2} />
-                    </Link>
-                    <UserRoundX size={20} strokeWidth={2} />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
       ) : (

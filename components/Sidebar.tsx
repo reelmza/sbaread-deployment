@@ -51,7 +51,7 @@ const Sidebar = () => {
             <Link href={"/readers"}>
               <div
                 className={`w-full h-12 flex items-center ${
-                  path === "/readers"
+                  path.includes("/readers")
                     ? "bg-white text-accent font-semibold"
                     : ""
                 } text-sm px-10 gap-2 mb-2 cursor-pointer`}
@@ -79,7 +79,7 @@ const Sidebar = () => {
             <Link href={"/authors"}>
               <div
                 className={`w-full h-12 flex items-center ${
-                  path === "/authors"
+                  path.includes("/authors")
                     ? "bg-white text-accent font-semibold"
                     : ""
                 } text-sm  px-10 gap-2 mb-2 cursor-pointer`}

@@ -75,7 +75,7 @@ const Header = () => {
               {/* Inivte Admin */}
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className="bg-accent text-sm text-white rounded-lg h-8 px-5">
+                  <button className="bg-accent text-sm text-white rounded h-8 px-5">
                     Invite Admin
                   </button>
                 </DialogTrigger>
