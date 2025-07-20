@@ -19,6 +19,18 @@ const Page = ({ id }: { id: number }) => {
     email: string;
     account_type: string;
     phone: string;
+    kyc_info: {
+      first_name: string;
+      last_name: String;
+      gender: string;
+      dob: string;
+      phone: string;
+      city: string;
+      state: string;
+      country: string;
+      address_line1: string;
+      address_line2: string;
+    };
   } | null>(null);
 
   useEffect(() => {
@@ -65,9 +77,11 @@ const Page = ({ id }: { id: number }) => {
                 className="rounded-full mb-5 aspect-square"
               />
 
-              <div className="flex flex-col items-center justify-center mb-5">
+              <div className="flex items-center justify-center gap-2 mb-2">
                 <div className="text-lg font-semibold text-center">
-                  {pageData?.name}
+                  {pageData?.kyc_info.first_name +
+                    " " +
+                    pageData.kyc_info.last_name}
                 </div>
                 <div
                   className={`flex items-center justify-center px-2 rounded-lg text-xs h-full font-semibold ${
@@ -87,7 +101,7 @@ const Page = ({ id }: { id: number }) => {
             <div className="w-2/3 bg-gray-100 p-10 rounded-lg flex flex-wrap">
               <div className="w-1/2 mb-5">
                 <div className="text-gray-600">Phone Number:</div>
-                <div>{pageData?.phone || "-"}</div>
+                <div>{pageData?.kyc_info.phone || "-"}</div>
               </div>
 
               <div className="w-1/2 mb-5">
@@ -105,10 +119,26 @@ const Page = ({ id }: { id: number }) => {
                     )}
                 </div>
               </div>
+
+              <div className="w-1/2 mb-5">
+                <div className="text-gray-600">Address:</div>
+                <div>
+                  {pageData?.kyc_info.address_line1 +
+                    ", " +
+                    pageData.kyc_info.city +
+                    ", " +
+                    pageData.kyc_info.country}
+                </div>
+              </div>
+
+              <div className="w-1/2 mb-5">
+                <div className="text-gray-600">Date of Birth:</div>
+                <div>{pageData?.kyc_info.dob}</div>
+              </div>
             </div>
           </div>
 
-          <button className="bg-red-600 h-10 px-5 self-end mr-10 rounded text-white text-sm font-semibold">
+          <button className="hidden bg-red-600 h-10 px-5 self-end mr-10 rounded text-white text-sm font-semibold">
             Suspend User
           </button>
         </div>
