@@ -82,13 +82,15 @@ const Book = ({ book, setActiveBook, setModalState }: BookType) => {
 
       <div className="flex justify-between p-4">
         <div>
-          <div className="font-semibold leading-5 mb-2">{book?.title}</div>
-          <div className="text-sm text-gray-600">
+          <div className="font-semibold leading-5 mb-2 text-sm">
+            {book?.title}
+          </div>
+          <div className="text-xs text-gray-600">
             {book?.publisher || "No Publisher"}
           </div>
         </div>
 
-        <div className="w-20 flex items-center justify-center bg-accent text-sm rounded-full h-8 font-semibold shrink-0">
+        <div className="w-fit px-2 lg:px-0 lg:w-20 flex items-center justify-center text-accent-dark lg:bg-accent rounded-full h-5 lg:h-8 font-semibold shrink-0 text-xs">
           ${book.actual_price}
         </div>
       </div>
@@ -185,7 +187,7 @@ const Books = () => {
     <>
       {pageData && loading !== "page" ? (
         <div className="px-10 w-full flex justify-between">
-          <div className="w-[55%] flex items-center justify-between flex-wrap">
+          <div className="w-full lg:w-[55%] flex items-center justify-between flex-wrap">
             {pageData?.map((book, key) => {
               return (
                 <Book
@@ -197,7 +199,9 @@ const Books = () => {
               );
             })}
           </div>
-          <div className="w-[40%]">
+
+          {/* Sidebar */}
+          <div className="hidden lg:block w-[40%]">
             <div className="fixed top-28 right-10 w-[calc(40%-7.7rem)] h-12">
               {/* Search Bar */}
               <div className="h-12 w-full bg-gray-100 rounded-md flex items-center mb-5">

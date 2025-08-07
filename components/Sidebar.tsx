@@ -6,14 +6,13 @@ import { usePathname } from "next/navigation";
 
 const Sidebar = () => {
   const path = usePathname();
-  console.log(path);
   return (
     <>
       {path !== "/" &&
       path !== "/set-password" &&
       path !== "/reset-password" ? (
         <>
-          <div className="fixed flex flex-col left-0 top-0 shrink-0 h-full w-2/12 bg-[#fff1e6]">
+          <div className="fixed hidden lg:flex flex-col left-0 top-0 shrink-0 h-full w-2/12 bg-[#fff1e6]">
             {/* Logo */}
             <div className="flex items-center justify-center h-32">
               <Image
@@ -187,7 +186,7 @@ const Sidebar = () => {
               </div>
             </Link> */}
           </div>
-          <div className="shrink-0 w-2/12 h-full bg-green-100"></div>
+          <div className="hidden lg:block shrink-0 w-2/12 h-full bg-green-100"></div>
         </>
       ) : (
         ""

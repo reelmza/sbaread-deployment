@@ -16,16 +16,19 @@ import { signOut } from "next-auth/react";
 const Header = () => {
   const [profileState, setProfileState] = useState(false);
   const path = usePathname();
-  console.log(path);
+
   return (
     <>
       {path !== "/" &&
       path !== "/set-password" &&
       path !== "/reset-password" ? (
         <>
-          <div className="fixed w-[calc(100%-16.6667%)] h-20 flex items-center justify-between border-b border-gray-100 bg-white px-10 z-20 p-10">
-            <div className="">Account Overview</div>
-            <div className="flex items-center text-gray-600">
+          <div className="fixed w-full lg:w-[calc(100%-16.6667%)] h-20 flex items-center justify-between border-b border-gray-100 bg-white px-10 z-20 p-10">
+            <div className="">
+              {path.split("/")[1].slice(0, 1).toLocaleUpperCase() +
+                path.split("/")[1].slice(1, path.length)}
+            </div>
+            <div className="hidden lg:flex items-center justify-center text-gray-600 ">
               {/* Notification */}
               <div className="relative flex items-center justify-center h-fit w-fit shrink-0">
                 <Bell size={22} strokeWidth={2.5} className="mr-4" />
@@ -75,7 +78,7 @@ const Header = () => {
               {/* Inivte Admin */}
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className="bg-accent text-sm text-white rounded h-8 px-5">
+                  <button className="bg-accent text-sm text-white rounded h-8 px-5 hidden lg:block">
                     Invite Admin
                   </button>
                 </DialogTrigger>
