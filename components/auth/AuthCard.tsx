@@ -15,7 +15,7 @@ const AuthCard = ({
 }>) => {
   return (
     <form
-      className="relative w-2/6 shadow rounded-2xl flex flex-col items-center justify-center px-10 mt-10"
+      className="relative w-full lg:w-2/6 lg:shadow rounded-2xl flex flex-col items-center justify-center px-10 mt-10"
       onSubmit={onSubmit}
     >
       <ThemeSpacer size="section" />
