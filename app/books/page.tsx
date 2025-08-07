@@ -65,7 +65,7 @@ type BookType = {
 const Book = ({ book, setActiveBook, setModalState }: BookType) => {
   return (
     <div
-      className="shadow w-[48%] rounded-md overflow-hidden shrink-0 mb-5 cursor-pointer  font-sans"
+      className="border lg:border-none lg:shadow w-[48%] rounded-md overflow-hidden shrink-0 mb-5 cursor-pointer font-sans"
       onClick={() => {
         setActiveBook(book);
         setModalState(true);
@@ -77,6 +77,7 @@ const Book = ({ book, setActiveBook, setModalState }: BookType) => {
           alt="A book cover"
           height={500}
           width={500}
+          className="aspect-square"
         />
       </div>
 
@@ -186,7 +187,7 @@ const Books = () => {
   return (
     <>
       {pageData && loading !== "page" ? (
-        <div className="px-10 w-full flex justify-between">
+        <div className="px-5 lg:px-10 w-full flex justify-between">
           <div className="w-full lg:w-[55%] flex items-center justify-between flex-wrap">
             {pageData?.map((book, key) => {
               return (
