@@ -1,7 +1,7 @@
 "use client";
 
-import { Bell, ChevronDown, Search } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { Bell, ChevronDown, Menu, Search } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -15,20 +15,62 @@ import { signOut } from "next-auth/react";
 
 const Header = () => {
   const [profileState, setProfileState] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const path = usePathname();
+  const router = useRouter();
 
+  const nav = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Readers", link: "/readers" },
+    { name: "Authors", link: "/authors" },
+    { name: "Books", link: "/books" },
+    { name: "Payments", link: "/payments" },
+  ];
   return (
     <>
       {path !== "/" &&
       path !== "/set-password" &&
       path !== "/reset-password" ? (
         <>
-          <div className="fixed w-full lg:w-[calc(100%-16.6667%)] h-20 flex items-center justify-between border-b border-gray-100 bg-white px-10 z-20 p-10">
+          <div className="fixed w-full lg:w-[calc(100%-16.6667%)] h-20 flex items-center lg:justify-between border-b border-gray-100 bg-white  z-20 py-5 px-5 lg:py-10 lg:px-10">
+            {/* Mobile menu button */}
+            <button
+              className="flex lg:hidden items-center justify-center pr-2"
+              onClick={() => setShowMenu((prev) => !prev)}
+            >
+              <Menu size={20} />
+            </button>
+
+            {/* Page Name */}
             <div className="">
               {path.split("/")[1].slice(0, 1).toLocaleUpperCase() +
                 path.split("/")[1].slice(1, path.length)}
             </div>
-            <div className="hidden lg:flex items-center justify-center text-gray-600 ">
+
+            {/* Mobile Menu  */}
+            <div
+              className={` lg:hidden absolute top-20 h-[100vh] w-[70%] bg-white px-5 pt-5 border-t border-gray-100 transition-all ease-in-out ${
+                showMenu ? "left-0" : "-left-[70vw]"
+              }`}
+            >
+              {nav.map((item, key) => {
+                return (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      setShowMenu(false);
+                      router.push(item.link);
+                    }}
+                    className="flex"
+                  >
+                    {item.name}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Desktop content */}
+            <div className="hidden lg:flex items-center justify-center text-gray-600">
               {/* Notification */}
               <div className="relative flex items-center justify-center h-fit w-fit shrink-0">
                 <Bell size={22} strokeWidth={2.5} className="mr-4" />

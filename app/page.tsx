@@ -79,7 +79,7 @@ export default function Home() {
           name="password"
           label="Password"
           placeholder="Enter your password"
-          defaultValue="mosesJ1@@"
+          defaultValue="mosesJ1@"
           icon={
             <LockKeyholeOpen
               size={18}
