@@ -138,18 +138,21 @@ const Books = () => {
       attachHeaders(session!.user.token);
       let res;
 
-      if (action !== "deleted") {
+      if (action !== "rejected") {
         res = await localAxios.post(
           `/books/${action.slice(0, action.length - 1)}/${id}`,
           {
-            review_notes: "Not qualitative enough.",
+            review_notes: "Unset",
+            rejection_reason: "Content does not meet quality standards.",
+            feedback: "Please improve the writing quality and resubmit.",
+            rejection_note: "Some note",
           }
         );
       } else {
-        res = await localAxios.post(
-          `/books/${id}/${action.slice(0, action.length - 1)}`,
-          { reason: "Book is against our policy." }
-        );
+        res = await localAxios.post(`/books/reject/${id}`, {
+          rejection_reason: "Content does not meet quality standards.",
+          feedback: "Please improve the writing quality and resubmit.",
+        });
       }
 
       if (res.status === 200 || res.status === 201) {
@@ -369,17 +372,17 @@ const Books = () => {
                           value="declined"
                           className="hover:text-orange-600 cursor-pointer"
                         >
-                          Decline
+                          Pending
                         </DropdownMenuRadioItem>
                         <DropdownMenuRadioItem
-                          value="deleted"
+                          value="rejected"
                           className={`hover:text-red-600 cursor-pointer ${
-                            activeBook?.status !== "declined"
+                            activeBook?.status === "approved"
                               ? "opacity-75 pointer-events-none"
                               : ""
                           }`}
                         >
-                          Delete
+                          Reject
                         </DropdownMenuRadioItem>
                       </DropdownMenuRadioGroup>
                     </DropdownMenuContent>

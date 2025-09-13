@@ -15,9 +15,19 @@ type PageData = {
   published_books_count: number;
   reader_count: number;
 
-  recent_book_uploads: { title: string }[];
-  recent_signups: { email: string }[];
-  recent_transactions: { id: number }[];
+  recent_book_uploads: { title: string; authors: { name: string }[] }[];
+  recent_signups: {
+    name: string;
+    account_type: string;
+    email: string;
+    status: string;
+  }[];
+  recent_transactions: {
+    amount: number;
+    description: string;
+    currency: "USD" | "NGN";
+    direction: string;
+  }[];
 };
 const Dashboard = () => {
   const { data: session } = useSession();
@@ -164,19 +174,19 @@ const Dashboard = () => {
               <div className="pr-4 text-lg text-accent-dark font-semibold">
                 Recent Activities
               </div>
-              <div className="grow h-[2px] bg-accent rounded-md"></div>
+              <div className="grow h-[1px] bg-gray-100 rounded-md"></div>
             </div>
 
             {/* Cards */}
-            <div className="w-full  flex items-center justify-between">
+            <div className="w-full flex justify-between pb-20">
               {/* Recent Uploads */}
-              <div className="flex flex-col w-[31%] min-h-[17rem] shadow  rounded-md overflow-hidden">
+              <div className="flex flex-col w-[32%] h-fit shadow rounded-md overflow-hidden">
                 {/* Heading */}
                 <div className="flex items-center justify-between bg-accent h-14 px-5">
                   <div className="font-semibold text-accent-dark">
                     Books Uploaded
                   </div>
-                  <div className="h-5 flex items-center justify-center px-3 rounded text-sm bg-neutral-50">
+                  <div className="h-5 flex items-center justify-center px-3 rounded-full text-sm bg-neutral-50">
                     {pageData.recent_book_uploads.length}
                   </div>
                 </div>
@@ -184,14 +194,17 @@ const Dashboard = () => {
                 {/* Content */}
                 <div className="p-5 grow">
                   {/* Activity */}
-                  {pageData.recent_book_uploads.slice(0, 4).map((book, key) => {
+                  {pageData.recent_book_uploads.slice(0, 5).map((book, key) => {
                     return (
-                      <div className="flex items-center gap-2 mb-2" key={key}>
-                        <div className="h-[6px] w-[6px] rounded-full bg-accent"></div>
-                        <div className="text-sm text-gray-600">
-                          {book.title.length > 35
-                            ? book.title.slice(0, 35) + "..."
-                            : book.title}
+                      <div className="flex items-centser gap-2 mb-2" key={key}>
+                        <div className="w-full flex flex-col text-gray-600">
+                          <div className="w-full flex items-center justify-between overflow-hidden leading-none text-xs font-semibold">
+                            <div className={`text-xs font-semibold`}>
+                              {book.authors[0].name}
+                            </div>
+                          </div>
+
+                          <div className="text-sm">{book.title}</div>
                         </div>
                       </div>
                     );
@@ -201,7 +214,7 @@ const Dashboard = () => {
                 {/* Button */}
                 <Link
                   href={"/books"}
-                  className="w-fit h-8 px-5 mx-5 bg-accent flex items-center gap-2 mb-5 rounded text-sm"
+                  className="w-fit h-8 hover:text-accent-dark mx-5 bg-accesnt flex items-center gap-2 mb-5 rounded text-sm"
                 >
                   <span>View All</span>
                   <svg
@@ -220,13 +233,13 @@ const Dashboard = () => {
               </div>
 
               {/* Recent Signups */}
-              <div className="flex flex-col w-[31%] min-h-[17rem] shadow  rounded-md overflow-hidden">
+              <div className="flex flex-col w-[32%] h-fit shadow rounded-md overflow-hidden">
                 {/* Heading */}
                 <div className="flex items-center justify-between bg-accent h-14 px-5">
                   <div className="font-semibold text-accent-dark">
                     Recent Signups
                   </div>
-                  <div className="h-5 flex items-center justify-center px-3 rounded text-sm bg-neutral-50">
+                  <div className="h-5 flex items-center justify-center px-3 rounded-full text-sm bg-neutral-50">
                     {pageData.recent_signups.length}
                   </div>
                 </div>
@@ -234,12 +247,30 @@ const Dashboard = () => {
                 {/* Content */}
                 <div className="p-5 grow">
                   {/* Activity */}
-                  {pageData.recent_signups.slice(0, 4).map((user, key) => {
+                  {pageData.recent_signups.slice(0, 5).map((user, key) => {
                     return (
-                      <div className="flex items-center gap-2 mb-2" key={key}>
-                        <div className="h-[6px] w-[6px] rounded-full bg-accent"></div>
-                        <div className="text-sm text-gray-600">
-                          {user.email}
+                      <div className="flex items-centser gap-2 mb-2" key={key}>
+                        <div className="w-full flex flex-col text-gray-600">
+                          <div className="w-full flex items-center justify-between overflow-hidden text-xs font-semibold">
+                            {user.account_type.slice(0, 1).toUpperCase()}
+                            {user.account_type.slice(
+                              1,
+                              user.account_type.length
+                            )}
+
+                            <div
+                              className={`ml-2 mr-1 text-[10px] font-medium ${
+                                user.status === "verified" ||
+                                user.status === "active"
+                                  ? "text-emerald-600 bg-emerald-100 px-[5px] py-[2px] rounded-full"
+                                  : "text-red-600  bg-red-100"
+                              }`}
+                            >
+                              {user.status}
+                            </div>
+                          </div>
+
+                          <div className="text-sm">{user.name}</div>
                         </div>
                       </div>
                     );
@@ -249,7 +280,7 @@ const Dashboard = () => {
                 {/* Button */}
                 <Link
                   href={"/authors"}
-                  className="w-fit h-8 px-5 mx-5 bg-accent flex items-center gap-2 mb-5 rounded text-sm"
+                  className="w-fit h-8 hover:text-accent-dark mx-5 bg-accesnt flex items-center gap-2 mb-5 rounded text-sm"
                 >
                   <span>View All</span>
                   <svg
@@ -268,13 +299,13 @@ const Dashboard = () => {
               </div>
 
               {/* Recent Transactions */}
-              <div className="flex flex-col w-[31%] min-h-[17rem] shadow  rounded-md overflow-hidden">
+              <div className="flex flex-col w-[32%] h-fit shadow rounded-md overflow-hidden">
                 {/* Heading */}
                 <div className="flex items-center justify-between bg-accent h-14 px-5">
                   <div className="font-semibold text-accent-dark">
                     Recent Transactions
                   </div>
-                  <div className="h-5 flex items-center justify-center px-3 rounded text-sm bg-neutral-50">
+                  <div className="h-5 flex items-center justify-center px-3 rounded-full text-sm bg-neutral-50">
                     {pageData.recent_transactions.length}
                   </div>
                 </div>
@@ -282,21 +313,37 @@ const Dashboard = () => {
                 {/* Content */}
                 <div className="p-5 grow">
                   {pageData.recent_transactions.length > 0 ? (
-                    pageData.recent_transactions
-                      .slice(0, 4)
-                      .map((user, key) => {
-                        return (
-                          <div
-                            className="flex items-center gap-2 mb-2"
-                            key={key}
-                          >
-                            <div className="h-[6px] w-[6px] rounded-full bg-accent"></div>
-                            <div className="text-sm text-gray-600">
-                              {user.id}
+                    pageData.recent_transactions.slice(0, 5).map((txn, key) => {
+                      return (
+                        <div
+                          className="flex items-centser gap-2 mb-2"
+                          key={key}
+                        >
+                          <div className="flex flex-col text-gray-600">
+                            <div
+                              className={`overflow-hidden font-semibold text-xs ${
+                                txn.direction === "credit"
+                                  ? "text-red-600"
+                                  : "text-emerald-600"
+                              }`}
+                            >
+                              <span>{txn.currency === "USD" ? "$" : "₦"}</span>
+                              {new Intl.NumberFormat("en-US", {
+                                style: "decimal",
+                                minimumFractionDigits: 2,
+                              }).format(txn.amount)}
+                              {txn.direction === "credit" ? "-" : "+"}
+                            </div>
+
+                            <div className="text-sm">
+                              {txn.description.length > 30
+                                ? txn.description.slice(0, 30) + "..."
+                                : txn.description}
                             </div>
                           </div>
-                        );
-                      })
+                        </div>
+                      );
+                    })
                   ) : (
                     <div className="text-gray-600 text-sm">
                       No transactions yet
@@ -307,7 +354,7 @@ const Dashboard = () => {
                 {/* Button */}
                 <Link
                   href={"/payments"}
-                  className="w-fit h-8 px-5 mx-5 bg-accent flex items-center gap-2 mb-5 rounded text-sm"
+                  className="w-fit h-8 hover:text-accent-dark mx-5 bg-accesnt flex items-center gap-2 mb-5 rounded text-sm"
                 >
                   <span>View All</span>
                   <svg

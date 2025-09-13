@@ -1,6 +1,14 @@
 "use client";
 
-import { Bell, ChevronDown, Menu, Search } from "lucide-react";
+import {
+  Bell,
+  ChevronDown,
+  Mail,
+  Menu,
+  Search,
+  Send,
+  User,
+} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Dialog,
@@ -9,12 +17,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { localAxios } from "@/lib/axios";
+import { toast } from "sonner";
+import Spinner from "./Spinner";
 
 const Header = () => {
+  const inviteFormRef = useRef<HTMLFormElement>(null);
   const [profileState, setProfileState] = useState(false);
+  const [loading, setLoading] = useState<string | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const path = usePathname();
   const router = useRouter();
@@ -26,6 +39,39 @@ const Header = () => {
     { name: "Books", link: "/books" },
     { name: "Payments", link: "/payments" },
   ];
+
+  const inviteAdmin = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    setLoading("inviteAdmin");
+
+    const target = e.target as typeof e.target & {
+      email: { value: string };
+      name: { value: string };
+      password: { value: string };
+    };
+    try {
+      const res = await localAxios.post(`/admin/invite-admin`, {
+        email: target.email.value,
+        name: target.name.value,
+        password: target.password.value,
+      });
+
+      console.log(res);
+      setLoading(null);
+      toast.success("Invite sent successfully", {
+        richColors: true,
+        position: "bottom-left",
+      });
+      inviteFormRef.current?.reset();
+    } catch (error) {
+      console.log(error);
+      setLoading(null);
+      toast.error("An error occured", {
+        richColors: true,
+        position: "bottom-left",
+      });
+    }
+  };
   return (
     <>
       {path !== "/" &&
@@ -126,27 +172,85 @@ const Header = () => {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Invite Admin</DialogTitle>
+                    <DialogTitle>Setup and Invite Admin</DialogTitle>
                   </DialogHeader>
 
-                  <form className="flex items-center justify-between gap-4">
-                    <div className="h-10 grow bg-gray-100 rounded-md flex items-center">
-                      <div className="flex items-center justify-center w-12">
-                        <Search
-                          size={20}
-                          strokeWidth={1.5}
-                          className="text-neutral"
+                  <form
+                    className="w-full items-center justify-between"
+                    onSubmit={inviteAdmin}
+                    ref={inviteFormRef}
+                  >
+                    {/* Inputs */}
+                    <div className="w-full flex flex-wrap items-center justify-between mb-5">
+                      {/* Email */}
+                      <div className="h-10 w-[49%] bg-gray-100 rounded-md flex items-center mb-2">
+                        <div className="flex items-center justify-center w-10">
+                          <Mail
+                            size={16}
+                            strokeWidth={1.5}
+                            className="text-neutral"
+                          />
+                        </div>
+                        <input
+                          name="email"
+                          type="email"
+                          className="w-full bg-transparent outline-none text-neutral-600 text-sm pr-3"
+                          placeholder="Target email"
+                          required
                         />
                       </div>
-                      <input
-                        type="text"
-                        className="grow bg-transparent outline-none text-neutral-600 text-sm"
-                        placeholder="Search for a reader"
-                      />
+
+                      {/* Username */}
+                      <div className="h-10 w-[49%] bg-gray-100 rounded-md flex items-center mb-2">
+                        <div className="flex items-center justify-center w-10">
+                          <User
+                            size={16}
+                            strokeWidth={1.5}
+                            className="text-neutral"
+                          />
+                        </div>
+                        <input
+                          name="name"
+                          type="text"
+                          className="bg-transparent outline-none text-neutral-600 text-sm"
+                          placeholder="Set username"
+                          required
+                        />
+                      </div>
+
+                      {/* Password */}
+                      <div className="h-10 w-[49%] bg-gray-100 rounded-md flex items-center">
+                        <div className="flex items-center justify-center w-10">
+                          <User
+                            size={16}
+                            strokeWidth={1.5}
+                            className="text-neutral"
+                          />
+                        </div>
+                        <input
+                          name="password"
+                          type="password"
+                          className="bg-transparent outline-none text-neutral-600 text-sm"
+                          placeholder="Set password"
+                          required
+                        />
+                      </div>
                     </div>
 
-                    <button className="h-10 w-32 bg-emerald-600 rounded flex items-center justify-center text-sm text-white font-semibold cursor-pointer">
-                      Invite
+                    {/* Submit Button */}
+                    <button
+                      className={`h-10 px-5 bg-emerald-600 hover:bg-emerald-800 rounded flex items-center justify-center text-sm text-white font-semibold cursor-pointer gap-2 ${
+                        loading === "inviteAdmin"
+                          ? "pointer-events-none opacity-75"
+                          : ""
+                      }`}
+                    >
+                      Send an Invite
+                      {loading === "inviteAdmin" ? (
+                        <Spinner className="size-4" />
+                      ) : (
+                        <Send size={16} />
+                      )}
                     </button>
                   </form>
                 </DialogContent>
