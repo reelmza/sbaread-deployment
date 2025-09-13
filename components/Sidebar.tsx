@@ -154,12 +154,12 @@ const Sidebar = () => {
                   />
                 </svg>
 
-                <span>Payments</span>
+                <span>Transactions</span>
               </div>
             </Link>
 
             {/* Analytics */}
-            {/* <Link href={"/analytics"}>
+            <Link href={"/analytics"}>
               <div
                 className={`w-full h-12 flex items-center ${
                   path === "/analytics"
@@ -184,7 +184,7 @@ const Sidebar = () => {
 
                 <span>Analytics</span>
               </div>
-            </Link> */}
+            </Link>
           </div>
           <div className="hidden lg:block shrink-0 w-2/12 h-full bg-green-100"></div>
         </>

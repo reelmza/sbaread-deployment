@@ -1,28 +1,20 @@
 "use client";
 
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-const chartData = [
-  { month: "January", complete: 140_000 },
-  { month: "February", complete: 80_000 },
-  { month: "March", complete: 120_000 },
-  { month: "April", complete: 100_000 },
-  { month: "May", complete: 110_000 },
-  { month: "June", complete: 120_000 },
-  { month: "July", complete: 140_000 },
-  { month: "August", complete: 140_000 },
-  { month: "September", complete: 140_000 },
-  { month: "October", complete: 120_000 },
-  { month: "November", complete: 140_000 },
-  { month: "December", complete: 300_000 },
-];
+import { useEffect, useState } from "react";
 
+type PageData = {
+  type: string;
+  amount: string;
+  status: string;
+  created_at: string;
+}[];
 const chartConfig = {
   complete: {
     label: "Revenue",
@@ -30,13 +22,59 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function LineChart() {
+export function LineChart({ pageData }: { pageData: PageData }) {
+  const [chartData, setChartData] = useState<
+    | null
+    | {
+        date: string;
+        totalVolume: number;
+      }[]
+  >(null);
+  useEffect(() => {
+    if (!pageData) return;
+
+    function sort(transactions: PageData) {
+      const today = new Date();
+
+      // Create a map for transaction sums
+      const sums: any = {};
+
+      // Group volumes by day (YYYY-MM-DD)
+      transactions.forEach((tx) => {
+        const day = tx.created_at.split("T")[0]; // extract YYYY-MM-DD
+        sums[day] = (sums[day] || 0) + Number(tx.amount);
+      });
+
+      // Generate the last 7 days (including today)
+      const result = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const dayStr = d.toISOString().split("T")[0];
+        result.push({
+          date: dayStr,
+          totalVolume: sums[dayStr] || 0,
+        });
+      }
+      // console.log(result);
+      setChartData(result);
+    }
+
+    sort(
+      pageData.filter(
+        (item) => item.type === "purchase" && item.status === "succeeded"
+      )
+    );
+
+    return () => {};
+  }, [pageData]);
+
   return (
     <div className="bordser rounded-lg bg-white shasdow">
       <ChartContainer config={chartConfig}>
         <AreaChart
           accessibilityLayer
-          data={chartData}
+          data={chartData!}
           margin={{ left: 20, top: 40, right: 20, bottom: 10 }}
         >
           <defs>
@@ -47,18 +85,20 @@ export function LineChart() {
           </defs>
           <CartesianGrid vertical={false} strokeDasharray={"10 10"} />
           <XAxis
-            dataKey="month"
+            dataKey="date"
             tickLine={false}
             axisLine={false}
             tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
+            tickFormatter={(value) =>
+              value.split("-")[1] + "/" + value.split("-")[2]
+            }
           />
           <ChartTooltip
             cursor={false}
             content={<ChartTooltipContent indicator="line" />}
           />
           <Area
-            dataKey={"complete"}
+            dataKey={"totalVolume"}
             type="natural"
             fill="url(#colorUv)"
             fillOpacity={0.5}
