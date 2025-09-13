@@ -144,7 +144,7 @@ const Page = () => {
       <div className="flex justify-between mb-10">
         <div className="w-[60%]">
           <div className="px-5">User Growth Chart</div>
-          <LineChart />
+          {/* <LineChart /> */}
         </div>
 
         <div className="w-[30%]">
