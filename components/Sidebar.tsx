@@ -159,12 +159,10 @@ const Sidebar = () => {
             </Link>
 
             {/* Analytics */}
-            <Link href={"/analytics"}>
+            <Link href={"/orders"}>
               <div
                 className={`w-full h-12 flex items-center ${
-                  path === "/analytics"
-                    ? "bg-white text-accent font-semibold"
-                    : ""
+                  path === "/orders" ? "bg-white text-accent font-semibold" : ""
                 } text-sm  px-10 gap-2 mb-2 cursor-pointer`}
               >
                 <svg
@@ -182,7 +180,7 @@ const Sidebar = () => {
                   />
                 </svg>
 
-                <span>Analytics</span>
+                <span>Orders</span>
               </div>
             </Link>
           </div>
