@@ -97,9 +97,9 @@ const Page = () => {
               <div className="col-span-1">Items</div>
 
               {/* Phone Number */}
-              <div className="col-span-2">Destination</div>
+              <div className="col-span-1">Destination</div>
 
-              <div className="col-span-2">Date</div>
+              <div className="col-span-3">Date</div>
 
               {/* Action */}
               <div className="col-span-1">Actions</div>
@@ -127,23 +127,25 @@ const Page = () => {
 
                   {/* Total Amount */}
                   <div className="col-span-1">
-                    {new Intl.NumberFormat().format(Number(item.total_amount))}
+                    ${new Intl.NumberFormat().format(Number(item.total_amount))}
                   </div>
 
                   {/* Total items */}
                   <div className="col-span-1">{item.items.length} pcs</div>
 
                   {/* Delivery Address */}
-                  <div className="col-span-2">{item.delivery_address}</div>
+                  <div className="col-span-1">{item.delivery_address}</div>
 
                   {/* Date */}
-                  <div className="col-span-2">
-                    {item.created_at.split("T")[0]}
+                  <div className="col-span-3">
+                    {item.created_at.split("T")[0] +
+                      " " +
+                      item.created_at.split("T")[1].split(".")[0]}
                   </div>
 
                   {/* Action */}
                   <div className="col-span-1 flex items-center gap-2">
-                    <Link href={`/order/${item.tracking_number}`}>Manage</Link>
+                    <Link href={`/orders/${item.tracking_number}`}>Manage</Link>
                   </div>
                 </div>
               );

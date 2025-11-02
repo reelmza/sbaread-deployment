@@ -66,7 +66,7 @@ export default function Home() {
           name="email"
           label="Email"
           placeholder="Enter your email"
-          defaultValue="jessemoses71@gmail.com"
+          defaultValue=""
           icon={
             <Mail size={18} strokeWidth={1.5} className="text-neutral-dark" />
           }
@@ -79,7 +79,7 @@ export default function Home() {
           name="password"
           label="Password"
           placeholder="Enter your password"
-          defaultValue="mosesJ1@"
+          defaultValue=""
           icon={
             <LockKeyholeOpen
               size={18}
